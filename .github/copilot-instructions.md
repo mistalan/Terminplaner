@@ -2,22 +2,29 @@
 
 ## Project Overview
 
-**Terminplaner** is a custom appointment/schedule planner application being developed as a personal project. The repository name translates from German as "appointment planner" or "scheduler".
+**Terminplaner** is a custom appointment/schedule planner application being developed as a personal project. The repository name translates from German as "appointment planner" or "scheduler". It consists of a backend API and a cross-platform mobile/desktop frontend.
 
 ### Repository Information
-- **Type**: .NET Web Application (ASP.NET Core Web API)
+- **Type**: Multi-project solution with ASP.NET Core Web API backend and .NET MAUI frontend
 - **Primary Language**: C#
-- **Target Framework**: .NET 9.0 or later
-- **Project Structure**: ASP.NET Core Web API with minimal API pattern
-- **Size**: Small personal project (currently in early development)
-- **Repository State**: The main branch contains only README.md and .gitignore. Active development occurs in feature branches.
+- **Target Framework**: .NET 9.0
+- **Project Structure**: 
+  - **TerminplanerApi**: ASP.NET Core Web API with minimal API pattern (backend)
+  - **TerminplanerMaui**: .NET MAUI cross-platform app (frontend)
+- **Size**: Small personal project
+- **Repository State**: Active development with both backend and frontend projects
 
 ### Technology Stack
 - **Runtime**: .NET SDK 9.0.x or later
-- **Framework**: ASP.NET Core (Web API)
+- **Backend Framework**: ASP.NET Core 9.0 (Web API)
+- **Frontend Framework**: .NET MAUI (Multi-platform App UI) with XAML
+- **Pattern**: MVVM (Model-View-ViewModel) with CommunityToolkit.Mvvm
+- **Data Storage**: In-Memory (List) in backend
+- **API**: RESTful API with JSON
 - **Build Tool**: dotnet CLI
 - **Version Control**: Git
 - **CI/CD**: GitHub Actions (Copilot workflow available)
+- **Target Platforms**: Android, iOS, Windows, macOS
 
 ## Build and Development Commands
 
@@ -40,46 +47,87 @@ dotnet --list-sdks
 
 ### Creating a New Project
 
-If no project exists yet, create a new ASP.NET Core Web API project:
+The project already exists with two main components:
+- **TerminplanerApi**: Backend Web API
+- **TerminplanerMaui**: Frontend MAUI app
+
+If you need to add additional projects to the solution:
 
 ```bash
-# Create a new Web API project
-dotnet new webapi -n TerminplanerApi --framework net9.0
-
-# Or create with a solution file
-dotnet new sln -n Terminplaner
-dotnet new webapi -n TerminplanerApi --framework net9.0
-dotnet sln add TerminplanerApi/TerminplanerApi.csproj
+# Add a new project to the existing solution
+dotnet new <template> -n <ProjectName> --framework net9.0
+dotnet sln add <ProjectName>/<ProjectName>.csproj
 ```
 
 ### Build Commands
 
-**IMPORTANT**: Always run commands from the repository root or the project directory containing the .csproj file.
+**IMPORTANT**: 
+- For the **API project**, run commands from `/TerminplanerApi` directory or specify the project path
+- For the **MAUI project**, run commands from `/TerminplanerMaui` directory or specify the project path
+- For **full solution** builds, run from the repository root
 
 **Clean build artifacts:**
 ```bash
+# Clean API project
+cd TerminplanerApi
+dotnet clean
+
+# Clean MAUI project  
+cd TerminplanerMaui
+dotnet clean
+
+# Clean entire solution
 dotnet clean
 ```
 - Removes bin/ and obj/ directories
 - Run this if you encounter build issues
-- Takes ~2-3 seconds
+- Takes ~2-3 seconds per project
 
 **Restore dependencies:**
 ```bash
+# Restore API project
+cd TerminplanerApi
+dotnet restore
+
+# Restore MAUI project (requires MAUI workload)
+cd TerminplanerMaui
+dotnet restore
+
+# Restore entire solution
 dotnet restore
 ```
 - Downloads NuGet packages
-- Usually automatic when building, but run explicitly if package issues occur
-- Takes ~3-5 seconds for small projects
+- MAUI restore requires MAUI workloads to be installed
+- Takes ~3-5 seconds for API, longer for MAUI
 
-**Build the project:**
+**Build the API project:**
 ```bash
+cd TerminplanerApi
 dotnet build
 ```
-- Compiles the project
-- Automatically runs restore if needed
+- Compiles the API project
 - Takes ~10-15 seconds for initial build, ~3-5 seconds for incremental
-- Output: bin/Debug/net9.0/[ProjectName].dll
+- Output: bin/Debug/net9.0/TerminplanerApi.dll
+
+**Build the MAUI project:**
+```bash
+cd TerminplanerMaui
+
+# For Android
+dotnet build -t:Build -f net9.0-android
+
+# For Windows (Windows only)
+dotnet build -t:Build -f net9.0-windows10.0.19041.0
+
+# For iOS (macOS only)
+dotnet build -t:Build -f net9.0-ios
+
+# For macOS (macOS only)
+dotnet build -t:Build -f net9.0-maccatalyst
+```
+- Compiles for the specified platform
+- Requires platform-specific SDKs and workloads
+- Takes longer than API builds (30-60 seconds)
 
 **Build with specific configuration:**
 ```bash
@@ -93,7 +141,7 @@ dotnet build --configuration Release
 dotnet test
 ```
 - Runs all test projects in the solution
-- If no test project exists, this command will complete quickly with no tests found
+- Currently no test projects exist in this repository
 - Takes ~4-5 seconds when no tests exist
 
 **Run tests with detailed output:**
@@ -105,6 +153,15 @@ dotnet test --logger "console;verbosity=detailed"
 
 **Format code (verify only):**
 ```bash
+# Format API project
+cd TerminplanerApi
+dotnet format --verify-no-changes
+
+# Format MAUI project
+cd TerminplanerMaui
+dotnet format --verify-no-changes
+
+# Format entire solution
 dotnet format --verify-no-changes
 ```
 - Checks if code follows formatting rules
@@ -120,25 +177,49 @@ dotnet format
 
 ### Running the Application
 
-**Run in development mode:**
+**Run the Backend API in development mode:**
 ```bash
+cd TerminplanerApi
 dotnet run
 ```
 - Starts the web server
-- Default URLs: http://localhost:5216 (HTTPS) or http://localhost:5215 (HTTP)
+- Default URL: **http://localhost:5215**
 - Press Ctrl+C to stop
+- **IMPORTANT**: The API must be running for the MAUI app to function
+
+**Run the MAUI App:**
+```bash
+cd TerminplanerMaui
+
+# For Android (requires Android emulator or device)
+dotnet build -t:Run -f net9.0-android
+
+# For Windows (Windows only)
+dotnet build -t:Run -f net9.0-windows10.0.19041.0
+
+# For iOS (macOS only)
+dotnet build -t:Run -f net9.0-ios
+
+# For macOS (macOS only)
+dotnet build -t:Run -f net9.0-maccatalyst
+```
+- Builds and runs the MAUI app on the specified platform
+- Requires platform-specific SDKs and emulators/devices
+- The backend API must be running first
 
 **Run with specific environment:**
 ```bash
 dotnet run --environment Production
 ```
 
-**Run with hot reload (watch mode):**
+**Run API with hot reload (watch mode):**
 ```bash
+cd TerminplanerApi
 dotnet watch run
 ```
 - Automatically rebuilds and restarts on file changes
-- Useful for development
+- Useful for API development
+- Not applicable for MAUI apps
 
 ## Project Layout and Architecture
 
@@ -146,46 +227,103 @@ dotnet watch run
 ```
 /
 ├── .gitignore          # Visual Studio/C# gitignore patterns (comprehensive)
-├── README.md           # Basic project description
+├── README.md           # Project documentation
+├── QUICKSTART.md       # Quick start guide
+├── Terminplaner.sln    # Solution file containing both projects
 ├── .github/
 │   └── copilot-instructions.md  # This file
-└── [ProjectName]/      # Main project directory (e.g., TerminplanerApi/)
+├── TerminplanerApi/    # Backend Web API project
+└── TerminplanerMaui/   # Frontend MAUI app project
 ```
 
-### Typical ASP.NET Core Project Structure
+### Backend API Project Structure (TerminplanerApi)
 ```
 TerminplanerApi/
-├── Program.cs          # Application entry point and configuration
+├── Program.cs          # API entry point and minimal API endpoints
 ├── appsettings.json    # Application configuration (production)
 ├── appsettings.Development.json  # Development-specific configuration
-├── [ProjectName].csproj  # Project file (dependencies, target framework)
-├── [ProjectName].http  # HTTP request examples (optional)
+├── TerminplanerApi.csproj  # Backend project file
+├── TerminplanerApi.http    # HTTP request examples
 ├── Properties/
 │   └── launchSettings.json  # Development launch profiles
-├── Controllers/        # API controllers (if using controller pattern)
-├── Models/             # Data models
-├── Services/           # Business logic
-├── wwwroot/            # Static files
+├── Models/
+│   └── Appointment.cs  # Data model for appointments
+├── Services/
+│   └── AppointmentService.cs  # Business logic & in-memory storage
+├── bin/                # Build output (ignored by git)
+└── obj/                # Intermediate build files (ignored by git)
+```
+
+### Frontend MAUI Project Structure (TerminplanerMaui)
+```
+TerminplanerMaui/
+├── MauiProgram.cs      # MAUI app initialization and DI setup
+├── App.xaml            # App-level XAML definition
+├── App.xaml.cs         # App-level code-behind
+├── AppShell.xaml       # Shell/Navigation definition
+├── AppShell.xaml.cs    # Shell code-behind
+├── TerminplanerMaui.csproj  # MAUI project file (multi-targeted)
+├── Models/
+│   └── Appointment.cs  # Client-side data model
+├── Services/
+│   └── AppointmentApiService.cs  # API client service
+├── ViewModels/
+│   ├── MainViewModel.cs  # Main page ViewModel (MVVM)
+│   └── EditAppointmentViewModel.cs  # Edit page ViewModel
+├── Pages/
+│   ├── MainPage.xaml   # Main UI page
+│   ├── MainPage.xaml.cs  # Main page code-behind
+│   ├── EditAppointmentPage.xaml  # Edit UI page
+│   └── EditAppointmentPage.xaml.cs  # Edit page code-behind
+├── Platforms/
+│   ├── Android/        # Android-specific code and resources
+│   ├── iOS/            # iOS-specific code and resources
+│   ├── Windows/        # Windows-specific code and resources
+│   └── MacCatalyst/    # macOS-specific code and resources
+├── Resources/
+│   ├── Images/         # App icons and images
+│   ├── Fonts/          # Custom fonts
+│   ├── Styles/         # XAML styles
+│   └── Raw/            # Other resources
 ├── bin/                # Build output (ignored by git)
 └── obj/                # Intermediate build files (ignored by git)
 ```
 
 ### Key Configuration Files
 
-**Project File (*.csproj)**
-- Defines target framework (e.g., net9.0)
+**Backend API Project Files:**
+
+**TerminplanerApi.csproj**
+- Defines target framework (net9.0)
 - Lists NuGet package dependencies
-- Located in project directory
+- Uses Microsoft.NET.Sdk.Web SDK
 
 **appsettings.json**
 - Application configuration
-- Connection strings, logging settings, etc.
+- API settings, logging configuration
 - **IMPORTANT**: Never commit secrets; use appsettings.Development.json or environment variables for sensitive data
 
 **launchSettings.json**
 - Development server settings
-- URLs, environment variables, profiles
+- Default URL: http://localhost:5215
 - Located in Properties/ directory
+
+**Frontend MAUI Project Files:**
+
+**TerminplanerMaui.csproj**
+- Multi-targeted for multiple platforms: net9.0-android, net9.0-ios, net9.0-maccatalyst, net9.0-windows10.0.19041.0
+- Uses Microsoft.NET.Sdk SDK with UseMaui=true
+- References MAUI NuGet packages (Microsoft.Maui.Controls, CommunityToolkit.Mvvm)
+- Platform-specific settings (SupportedOSPlatformVersion, etc.)
+
+**MauiProgram.cs**
+- MAUI app initialization
+- Dependency injection container setup
+- Service, ViewModel, and Page registration
+
+**App.xaml / App.xaml.cs**
+- Application-level configuration
+- App lifecycle events
 
 ## CI/CD and Validation
 
@@ -205,20 +343,33 @@ TerminplanerApi/
 
 1. **Format code:**
    ```bash
+   # Format API
+   cd TerminplanerApi
+   dotnet format
+   
+   # Format MAUI
+   cd ../TerminplanerMaui
    dotnet format
    ```
 
-2. **Clean and build:**
+2. **Clean and build API:**
    ```bash
+   cd TerminplanerApi
    dotnet clean && dotnet build
    ```
 
-3. **Run tests (if they exist):**
+3. **Build MAUI (optional, requires workloads):**
+   ```bash
+   cd TerminplanerMaui
+   dotnet build -f net9.0-android
+   ```
+
+4. **Run tests (if they exist):**
    ```bash
    dotnet test
    ```
 
-4. **Verify formatting:**
+5. **Verify formatting:**
    ```bash
    dotnet format --verify-no-changes
    ```
@@ -230,8 +381,18 @@ All commands should complete successfully with exit code 0.
 ### Build Issues
 
 **Issue: "Project not found" or "No project specified"**
-- **Solution**: Ensure you're in the correct directory containing the .csproj file
+- **Solution**: Ensure you're in the correct project directory (TerminplanerApi or TerminplanerMaui)
 - Or specify the project path: `dotnet build path/to/Project.csproj`
+
+**Issue: MAUI workloads not installed**
+- **Error**: `error NETSDK1147: To build this project, the following workloads must be installed: maui-android`
+- **Solution**: Install required MAUI workloads:
+  ```bash
+  dotnet workload restore
+  # Or install specific workloads
+  dotnet workload install maui-android maui-ios maui-windows maui-maccatalyst
+  ```
+- **Note**: In CI environments, MAUI workloads may not be available. Focus on building the API project.
 
 **Issue: NuGet package restore failures**
 - **Solution**: Clear NuGet cache and restore:
@@ -246,6 +407,10 @@ All commands should complete successfully with exit code 0.
   dotnet clean
   dotnet build
   ```
+
+**Issue: MAUI app can't connect to API**
+- **Solution**: Ensure the API is running on http://localhost:5215
+- Check network settings on Android emulator (use 10.0.2.2:5215 instead of localhost:5215)
 
 ### Formatting Issues
 
@@ -265,15 +430,21 @@ All commands should complete successfully with exit code 0.
   dotnet dev-certs https --trust
   ```
 
+**Issue: Android emulator not found**
+- **Solution**: Start Android emulator before running the MAUI app
+- Or connect a physical Android device via USB with USB debugging enabled
+
 ## Important Notes for Coding Agents
 
 ### Always Do:
 1. **Run `dotnet build` before and after making code changes** to verify compilation
-2. **Run `dotnet format` before committing** to ensure code style consistency
-3. **Use `dotnet clean` if encountering mysterious build errors**
-4. **Check project directory structure** - commands must run from correct location
-5. **Read the .csproj file** to understand dependencies and target framework
-6. **Verify all paths are absolute** when working with files
+2. **Build API and MAUI projects separately** - API can be built without MAUI workloads
+3. **Run `dotnet format` before committing** to ensure code style consistency
+4. **Use `dotnet clean` if encountering mysterious build errors**
+5. **Check project directory structure** - commands must run from correct location (TerminplanerApi or TerminplanerMaui)
+6. **Read the .csproj files** to understand dependencies and target frameworks
+7. **Verify all paths are absolute** when working with files
+8. **Ensure API is running** before starting the MAUI app for testing
 
 ### Never Do:
 1. **Never commit bin/ or obj/ directories** - they're in .gitignore for a reason
@@ -281,42 +452,79 @@ All commands should complete successfully with exit code 0.
 3. **Never modify .csproj manually** without understanding XML structure - use `dotnet add package` instead
 4. **Never assume test projects exist** - verify first with `dotnet test`
 5. **Never use `git reset --hard` or `git rebase`** - force push is not available
+6. **Never assume MAUI workloads are available in CI** - focus on API builds in CI environments
 
 ### Project-Specific Patterns
 
-**API Pattern:**
+**Backend API Pattern:**
 - This project uses minimal API pattern (app.MapGet, app.MapPost, etc.) in Program.cs
 - No separate controller classes needed for simple endpoints
 - Middleware configuration in Program.cs
+- Dependency injection: Services registered with builder.Services.Add*
+- Configuration: Access via IConfiguration interface, bound to appsettings.json
 
-**Dependency Injection:**
-- Services registered in Program.cs with builder.Services.Add*
-- Use constructor injection in classes that need services
-
-**Configuration:**
-- Access via IConfiguration interface
-- Bound to appsettings.json automatically
+**Frontend MAUI Pattern:**
+- Uses MVVM pattern with CommunityToolkit.Mvvm
+- ViewModels inherit from ObservableObject and use [ObservableProperty] attributes
+- Commands use [RelayCommand] attributes
+- Pages use XAML with data binding to ViewModels
+- Navigation via AppShell
+- Dependency injection: Services, ViewModels, and Pages registered in MauiProgram.cs
+- API communication via AppointmentApiService (HttpClient)
+- Platform-specific code in Platforms/ folders
 
 ## Command Reference Summary
+
+### Backend API Commands
 
 | Command | Purpose | Time | Exit Code |
 |---------|---------|------|-----------|
 | `dotnet --version` | Check .NET version | <1s | 0 |
-| `dotnet restore` | Restore packages | 3-5s | 0 |
-| `dotnet clean` | Remove build artifacts | 2-3s | 0 |
-| `dotnet build` | Compile project | 10-15s | 0 if success |
-| `dotnet test` | Run tests | 4-5s | 0 if all pass |
-| `dotnet format` | Format code | 2-3s | 0 |
+| `cd TerminplanerApi && dotnet restore` | Restore API packages | 3-5s | 0 |
+| `cd TerminplanerApi && dotnet clean` | Remove API build artifacts | 2-3s | 0 |
+| `cd TerminplanerApi && dotnet build` | Compile API project | 10-15s | 0 if success |
+| `cd TerminplanerApi && dotnet run` | Start API server | N/A | N/A (runs until stopped) |
+| `cd TerminplanerApi && dotnet watch run` | Start API with hot reload | N/A | N/A (runs until stopped) |
+| `cd TerminplanerApi && dotnet format` | Format API code | 2-3s | 0 |
+
+### Frontend MAUI Commands
+
+| Command | Purpose | Time | Exit Code |
+|---------|---------|------|-----------|
+| `cd TerminplanerMaui && dotnet restore` | Restore MAUI packages | 5-10s | 0 (requires workloads) |
+| `cd TerminplanerMaui && dotnet clean` | Remove MAUI build artifacts | 2-3s | 0 |
+| `cd TerminplanerMaui && dotnet build -f net9.0-android` | Build for Android | 30-60s | 0 if success |
+| `cd TerminplanerMaui && dotnet build -t:Run -f net9.0-android` | Build and run on Android | N/A | N/A (launches app) |
+| `cd TerminplanerMaui && dotnet build -f net9.0-windows10.0.19041.0` | Build for Windows | 30-60s | 0 if success |
+| `cd TerminplanerMaui && dotnet format` | Format MAUI code | 2-3s | 0 |
+
+### Solution-level Commands
+
+| Command | Purpose | Time | Exit Code |
+|---------|---------|------|-----------|
+| `dotnet test` | Run all tests | 4-5s | 0 (no tests exist) |
 | `dotnet format --verify-no-changes` | Check formatting | 2-3s | 0 if formatted |
-| `dotnet run` | Start application | N/A | N/A (runs until stopped) |
-| `dotnet watch run` | Start with hot reload | N/A | N/A (runs until stopped) |
+| `dotnet format` | Format all code | 2-3s | 0 |
 
 ## Trust These Instructions
 
 These instructions have been validated by:
-- Creating and building a test project
-- Running all commands successfully
-- Verifying timing and exit codes
-- Testing in the actual CI environment
+- Examining the actual project structure with both API and MAUI projects
+- Building and running the API project successfully
+- Reviewing the README.md and QUICKSTART.md documentation
+- Verifying project files (TerminplanerApi.csproj and TerminplanerMaui.csproj)
+- Confirming available .NET SDKs in the CI environment
 
-**If you encounter issues not covered here, search the repository first. Only if the information is incomplete or incorrect should you perform additional exploration.**
+**Architecture Notes:**
+- The repository contains TWO main projects: TerminplanerApi (backend) and TerminplanerMaui (frontend)
+- The API uses minimal API pattern (no controllers)
+- The MAUI app uses MVVM pattern with CommunityToolkit.Mvvm
+- The MAUI app communicates with the API via REST calls
+- Target platforms: Android, iOS, Windows, macOS
+
+**CI/CD Considerations:**
+- MAUI workloads may not be available in all CI environments
+- Focus on building and testing the API project in CI
+- MAUI builds require platform-specific SDKs and emulators
+
+**If you encounter issues not covered here, check README.md and QUICKSTART.md first. Only if the information is incomplete or incorrect should you perform additional exploration.**
