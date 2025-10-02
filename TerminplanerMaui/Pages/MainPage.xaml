@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:TerminplanerMaui.ViewModels"
+             xmlns:models="clr-namespace:TerminplanerMaui.Models"
+             x:Class="TerminplanerMaui.Pages.MainPage"
+             x:DataType="vm:MainViewModel"
+             Title="Terminplaner">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="20">
+        
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,20">
+            <Label Text="📅 Terminplaner"
+                   FontSize="32"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"/>
+            <Label Text="Termine einfach verwalten - wie in Word, nur besser!"
+                   FontSize="14"
+                   HorizontalOptions="Center"
+                   TextColor="Gray"/>
+        </VerticalStackLayout>
+
+        <!-- Add Appointment Section -->
+        <VerticalStackLayout Grid.Row="1" Spacing="10" Margin="0,0,0,20">
+            <Entry Placeholder="Neuer Termin..."
+                   Text="{Binding NewAppointmentText}"
+                   ReturnCommand="{Binding AddAppointmentCommand}"/>
+            
+            <Entry Placeholder="Kategorie (z.B. Arbeit, Privat)"
+                   Text="{Binding NewAppointmentCategory}"/>
+            
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="Farbe:"
+                       VerticalOptions="Center"/>
+                <Entry Text="{Binding NewAppointmentColor}"
+                       Placeholder="#808080"
+                       WidthRequest="100"
+                       HorizontalOptions="Start"/>
+                <BoxView Color="{Binding NewAppointmentColor}"
+                         WidthRequest="40"
+                         HeightRequest="40"
+                         CornerRadius="5"/>
+            </HorizontalStackLayout>
+
+            <Button Text="➕ Hinzufügen"
+                    Command="{Binding AddAppointmentCommand}"
+                    BackgroundColor="#667eea"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Padding="15,10"/>
+
+            <!-- Info Box -->
+            <Frame BackgroundColor="#f0f7ff"
+                   BorderColor="#667eea"
+                   CornerRadius="8"
+                   Padding="15"
+                   Margin="0,10,0,0">
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="💡 " FontAttributes="Bold"/>
+                            <Span Text="Tipp: " FontAttributes="Bold"/>
+                            <Span Text="Nutze die Pfeil-Buttons, um die Priorität zu ändern. Termine oben haben höchste Priorität!"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </Frame>
+        </VerticalStackLayout>
+
+        <!-- Appointments List -->
+        <RefreshView Grid.Row="2"
+                     IsRefreshing="{Binding IsRefreshing}"
+                     Command="{Binding LoadAppointmentsCommand}">
+            <CollectionView ItemsSource="{Binding Appointments}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       Spacing="20"
+                                       Padding="40">
+                        <Label Text="📝"
+                               FontSize="80"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Noch keine Termine vorhanden!"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Füge deinen ersten Termin hinzu, um loszulegen."
+                               FontSize="14"
+                               TextColor="Gray"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Appointment">
+                        <Frame Margin="0,5"
+                               Padding="15"
+                               CornerRadius="10"
+                               BorderColor="#e0e0e0"
+                               BackgroundColor="White">
+                            <Grid ColumnDefinitions="10,*,Auto" ColumnSpacing="15">
+                                
+                                <!-- Color Indicator -->
+                                <BoxView Grid.Column="0"
+                                        Color="{Binding Color}"
+                                        WidthRequest="10"
+                                        CornerRadius="5"/>
+
+                                <!-- Content -->
+                                <VerticalStackLayout Grid.Column="1" Spacing="5">
+                                    <Label Text="{Binding Text}"
+                                          FontSize="18"
+                                          FontAttributes="Bold"/>
+                                    <Label Text="{Binding Category, StringFormat='🏷️ {0}'}"
+                                          FontSize="14"
+                                          TextColor="Gray"/>
+                                    <Label Text="{Binding Priority, StringFormat='Priorität: {0}'}"
+                                          FontSize="12"
+                                          TextColor="LightGray"/>
+                                </VerticalStackLayout>
+
+                                <!-- Action Buttons -->
+                                <VerticalStackLayout Grid.Column="2" Spacing="5">
+                                    <HorizontalStackLayout Spacing="5">
+                                        <Button Text="⬆️"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=MovePriorityUpCommand}"
+                                               CommandParameter="{Binding .}"
+                                               BackgroundColor="#2196F3"
+                                               TextColor="White"
+                                               WidthRequest="40"
+                                               HeightRequest="40"
+                                               CornerRadius="5"
+                                               Padding="0"/>
+                                        <Button Text="⬇️"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=MovePriorityDownCommand}"
+                                               CommandParameter="{Binding .}"
+                                               BackgroundColor="#2196F3"
+                                               TextColor="White"
+                                               WidthRequest="40"
+                                               HeightRequest="40"
+                                               CornerRadius="5"
+                                               Padding="0"/>
+                                    </HorizontalStackLayout>
+                                    <HorizontalStackLayout Spacing="5">
+                                        <Button Text="✏️"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=EditAppointmentCommand}"
+                                               CommandParameter="{Binding .}"
+                                               BackgroundColor="#4caf50"
+                                               TextColor="White"
+                                               WidthRequest="40"
+                                               HeightRequest="40"
+                                               CornerRadius="5"
+                                               Padding="0"/>
+                                        <Button Text="🗑️"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=DeleteAppointmentCommand}"
+                                               CommandParameter="{Binding .}"
+                                               BackgroundColor="#f44336"
+                                               TextColor="White"
+                                               WidthRequest="40"
+                                               HeightRequest="40"
+                                               CornerRadius="5"
+                                               Padding="0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

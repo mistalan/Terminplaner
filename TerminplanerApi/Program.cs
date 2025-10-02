@@ -21,10 +21,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseCors();
 
-// Serve static files from wwwroot
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
