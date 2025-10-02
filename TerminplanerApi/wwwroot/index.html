@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminplaner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📅 Terminplaner</h1>
+            <p class="subtitle">Termine einfach verwalten - wie in Word, nur besser!</p>
+        </header>
+
+        <div class="add-section">
+            <input type="text" id="appointmentText" placeholder="Neuer Termin..." />
+            <input type="text" id="appointmentCategory" placeholder="Kategorie (z.B. Arbeit, Privat)" />
+            <input type="color" id="appointmentColor" value="#808080" title="Farbe auswählen" />
+            <button id="addButton" onclick="addAppointment()">➕ Hinzufügen</button>
+        </div>
+
+        <div class="info-box">
+            <p>💡 <strong>Tipp:</strong> Ziehe Termine per Drag & Drop, um die Priorität zu ändern. Termine oben haben höchste Priorität!</p>
+        </div>
+
+        <div id="appointmentsList" class="appointments-list">
+            <!-- Appointments will be rendered here -->
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
