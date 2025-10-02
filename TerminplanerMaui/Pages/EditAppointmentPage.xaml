@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:TerminplanerMaui.ViewModels"
+             x:Class="TerminplanerMaui.Pages.EditAppointmentPage"
+             x:DataType="vm:EditAppointmentViewModel"
+             Title="Termin bearbeiten">
+
+    <VerticalStackLayout Padding="20" Spacing="15">
+        
+        <Label Text="Termin bearbeiten"
+               FontSize="24"
+               FontAttributes="Bold"
+               Margin="0,0,0,20"/>
+
+        <Entry Placeholder="Termin"
+               Text="{Binding EditText}"/>
+
+        <Entry Placeholder="Kategorie"
+               Text="{Binding EditCategory}"/>
+
+        <HorizontalStackLayout Spacing="10">
+            <Label Text="Farbe:"
+                   VerticalOptions="Center"/>
+            <Entry Text="{Binding EditColor}"
+                   Placeholder="#808080"
+                   WidthRequest="100"
+                   HorizontalOptions="Start"/>
+            <BoxView Color="{Binding EditColor}"
+                     WidthRequest="40"
+                     HeightRequest="40"
+                     CornerRadius="5"/>
+        </HorizontalStackLayout>
+
+        <Button Text="💾 Speichern"
+                Command="{Binding SaveCommand}"
+                BackgroundColor="#4caf50"
+                TextColor="White"
+                CornerRadius="8"
+                Padding="15,10"
+                Margin="0,20,0,0"/>
+
+        <Button Text="❌ Abbrechen"
+                Command="{Binding CancelCommand}"
+                BackgroundColor="#e0e0e0"
+                TextColor="Black"
+                CornerRadius="8"
+                Padding="15,10"/>
+
+    </VerticalStackLayout>
+</ContentPage>
