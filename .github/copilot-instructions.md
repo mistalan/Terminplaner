@@ -7,13 +7,13 @@
 ### Repository Information
 - **Type**: .NET Web Application (ASP.NET Core Web API)
 - **Primary Language**: C#
-- **Target Framework**: .NET 8.0 or .NET 9.0
+- **Target Framework**: .NET 9.0 or later
 - **Project Structure**: ASP.NET Core Web API with minimal API pattern
 - **Size**: Small personal project (currently in early development)
 - **Repository State**: The main branch contains only README.md and .gitignore. Active development occurs in feature branches.
 
 ### Technology Stack
-- **Runtime**: .NET SDK 8.0.x or 9.0.x
+- **Runtime**: .NET SDK 9.0.x or later
 - **Framework**: ASP.NET Core (Web API)
 - **Build Tool**: dotnet CLI
 - **Version Control**: Git
@@ -24,12 +24,13 @@
 ### Environment Setup
 
 **Required Tools:**
-- .NET SDK 8.0 or later (9.0 recommended)
+- .NET SDK 9.0 or later
 - Git
 
 **Available .NET SDKs in CI environment:**
 - .NET 8.0.120, 8.0.206, 8.0.317, 8.0.414
 - .NET 9.0.110, 9.0.205, 9.0.305 (default)
+- .NET 10.0.x is NOT currently available in the CI environment
 
 **Verify .NET installation:**
 ```bash
@@ -124,7 +125,7 @@ dotnet format
 dotnet run
 ```
 - Starts the web server
-- Default URL: https://localhost:5001 (HTTPS) or http://localhost:5000 (HTTP)
+- Default URLs: http://localhost:5216 (HTTPS) or http://localhost:5215 (HTTP)
 - Press Ctrl+C to stop
 
 **Run with specific environment:**
@@ -172,7 +173,7 @@ TerminplanerApi/
 ### Key Configuration Files
 
 **Project File (*.csproj)**
-- Defines target framework (e.g., net9.0, net8.0)
+- Defines target framework (e.g., net9.0)
 - Lists NuGet package dependencies
 - Located in project directory
 
