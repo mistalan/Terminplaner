@@ -1,6 +1,54 @@
 @TerminplanerApi_HostAddress = http://localhost:5215
 
-GET {{TerminplanerApi_HostAddress}}/weatherforecast/
+# Get all appointments
+GET {{TerminplanerApi_HostAddress}}/api/appointments
 Accept: application/json
+
+###
+
+# Get appointment by ID
+GET {{TerminplanerApi_HostAddress}}/api/appointments/1
+Accept: application/json
+
+###
+
+# Create new appointment
+POST {{TerminplanerApi_HostAddress}}/api/appointments
+Content-Type: application/json
+
+{
+  "text": "Meeting",
+  "category": "Arbeit",
+  "color": "#0000FF"
+}
+
+###
+
+# Update appointment
+PUT {{TerminplanerApi_HostAddress}}/api/appointments/1
+Content-Type: application/json
+
+{
+  "text": "Updated Meeting",
+  "category": "Arbeit",
+  "color": "#FF0000",
+  "priority": 1
+}
+
+###
+
+# Delete appointment
+DELETE {{TerminplanerApi_HostAddress}}/api/appointments/1
+
+###
+
+# Update priorities
+PUT {{TerminplanerApi_HostAddress}}/api/appointments/priorities
+Content-Type: application/json
+
+{
+  "1": 2,
+  "2": 1
+}
 
 ###
