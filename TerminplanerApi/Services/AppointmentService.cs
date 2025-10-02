@@ -23,13 +23,13 @@ public class AppointmentService
     {
         appointment.Id = _nextId++;
         appointment.CreatedAt = DateTime.Now;
-        
+
         // Set priority to last if not specified
         if (appointment.Priority == 0)
         {
             appointment.Priority = _appointments.Count > 0 ? _appointments.Max(a => a.Priority) + 1 : 1;
         }
-        
+
         _appointments.Add(appointment);
         return appointment;
     }
