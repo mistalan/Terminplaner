@@ -2,13 +2,12 @@
 
 [![CI Status](https://github.com/mistalan/Terminplaner/workflows/CI%20-%20Build%20and%20Test/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/mistalan/Terminplaner/workflows/CodeQL%20Security%20Analysis/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/codeql.yml)
+[![Code Coverage](https://github.com/mistalan/Terminplaner/workflows/Code%20Coverage/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/coverage.yml)
 [![Docker](https://github.com/mistalan/Terminplaner/workflows/Docker%20Build%20and%20Push/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/docker.yml)
 [![.NET Version](https://img.shields.io/badge/.NET-9.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/9.0)
 [![License](https://img.shields.io/github/license/mistalan/Terminplaner)](LICENSE)
 
-Moderne Terminplaner-App für die Verwaltung von Terminen mit Kategorien und Prioritäten.
-
-Entwickelt als Alternative zum Word-Dokument-System - mit allen vertrauten Features, aber in einer modernen Cross-Platform-App die auf PC, Android, iOS und mehr funktioniert!
+Moderne Terminplaner-App für die Verwaltung von Terminen mit Kategorien und Prioritäten. Entwickelt als Alternative zum Word-Dokument-System - mit allen vertrauten Features, aber in einer modernen Cross-Platform-App die auf PC, Android, iOS und mehr funktioniert!
 
 ## 📱 Plattformen
 
@@ -155,6 +154,12 @@ curl -X POST http://localhost:5215/api/appointments \
 
 ```
 Terminplaner/
+├── .github/
+│   ├── workflows/          # CI/CD Workflows (CI, Coverage, CodeQL, Docker, etc.)
+│   ├── dependabot.yml      # Dependency update configuration
+│   ├── release-drafter.yml # Release notes configuration
+│   └── copilot-instructions.md
+│
 ├── TerminplanerApi/              # Backend Web API
 │   ├── Models/
 │   │   └── Appointment.cs        # Datenmodell für Termine
@@ -164,8 +169,9 @@ Terminplaner/
 │   └── TerminplanerApi.csproj    # Backend-Projekt-Datei
 │
 ├── TerminplanerApi.Tests/        # Tests für Backend API
-│   ├── AppointmentServiceTests.cs      # Unit Tests
-│   ├── AppointmentApiIntegrationTests.cs # Integration Tests
+│   ├── AppointmentServiceTests.cs      # Unit Tests (23)
+│   ├── AppointmentApiIntegrationTests.cs # Integration Tests (19)
+│   ├── TEST_CASES.md             # Detaillierte Test-Dokumentation
 │   └── TerminplanerApi.Tests.csproj    # Test-Projekt-Datei
 │
 ├── TerminplanerMaui/             # Cross-Platform MAUI App
@@ -178,26 +184,18 @@ Terminplaner/
 │   │   └── EditAppointmentViewModel.cs # Edit-ViewModel
 │   ├── Pages/
 │   │   ├── MainPage.xaml         # Hauptseite UI
-│   │   ├── MainPage.xaml.cs      # Code-behind
 │   │   ├── EditAppointmentPage.xaml # Edit-Seite UI
-│   │   └── EditAppointmentPage.xaml.cs # Code-behind
-│   ├── Platforms/
-│   │   ├── Android/              # Android-spezifischer Code
-│   │   ├── iOS/                  # iOS-spezifischer Code
-│   │   ├── Windows/              # Windows-spezifischer Code
-│   │   └── MacCatalyst/          # macOS-spezifischer Code
-│   ├── Resources/
-│   │   ├── Images/               # App-Icons und Bilder
-│   │   ├── Fonts/                # Schriftarten
-│   │   └── Styles/               # XAML-Styles
+│   │   └── *.xaml.cs             # Code-behind Dateien
+│   ├── Platforms/                # Plattform-spezifischer Code
+│   │   ├── Android/, iOS/, Windows/, MacCatalyst/
+│   ├── Resources/                # App-Ressourcen (Icons, Fonts, Styles)
 │   ├── App.xaml                  # App-Definition
 │   ├── AppShell.xaml             # Shell/Navigation
-│   ├── MauiProgram.cs            # App-Initialisierung
 │   └── TerminplanerMaui.csproj   # MAUI-Projekt-Datei
 │
-├── TEST_CASES.md                 # Dokumentation aller Test-Fälle
-├── README.md                     # Diese Datei
-└── QUICKSTART.md                 # Schnellstart-Anleitung
+├── Dockerfile                    # Docker-Konfiguration für API
+├── docker-compose.yml            # Docker Compose Setup
+└── README.md                     # Diese Datei
 ```
 
 ## 🧪 Tests
@@ -213,7 +211,12 @@ Das Projekt enthält umfassende Tests für die Backend-API:
 dotnet test
 ```
 
-**Detaillierte Test-Dokumentation:** Siehe [TEST_CASES.md](TEST_CASES.md)
+**Mit Code Coverage:**
+```bash
+dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage
+```
+
+**Detaillierte Test-Dokumentation:** Siehe [TerminplanerApi.Tests/TEST_CASES.md](TerminplanerApi.Tests/TEST_CASES.md)
 
 ## 🔮 Zukünftige Erweiterungen
 
@@ -242,25 +245,61 @@ dotnet test
 
 Das Projekt verfügt über automatisierte GitHub Actions Workflows für:
 
-- ✅ **Continuous Integration** - Automatische Tests bei jedem Push/PR
-- 🔒 **Security Scanning** - CodeQL-Analyse für Sicherheitslücken
-- 📊 **Code Coverage** - Automatische Coverage-Reports
-- 🐳 **Docker** - Containerisierung der API
-- 📦 **API Deployment** - Backend-Deployment für Linux und Windows
-- 📱 **Android Deployment** - APK-Generierung für Android-Geräte
-- 🖥️ **Windows Deployment** - MSIX/Installer für Windows Desktop
-- 🔄 **Dependabot** - Automatische Dependency-Updates
+### CI/CD Workflows
+
+| Workflow | Trigger | Beschreibung |
+|----------|---------|--------------|
+| **CI - Build and Test** | Push/PR to main | Baut API, führt alle 42 Tests aus, prüft Code-Formatierung |
+| **Code Coverage** | Push/PR to main | Generiert Coverage-Reports (erfordert optional `CODECOV_TOKEN` Secret) |
+| **CodeQL Security** | Push/PR to main, Weekly | Sicherheitsanalyse für C# Code |
+| **Docker Build** | Push to main, Tags | Baut und pusht Docker Image zu GHCR |
+| **Release Drafter** | Push to main, PRs | Erstellt automatisch Release-Notizen |
+| **Stale Bot** | Täglich | Schließt inaktive Issues/PRs nach 60/30 Tagen |
+| **Deploy API** | Tags `v*.*.*`, Manual | Erstellt Linux/Windows API Packages |
+| **Deploy Android** | Tags `android-v*.*.*`, Manual | Baut APK für Android |
+| **Deploy Windows** | Tags `windows-v*.*.*`, Manual | Baut Windows Desktop App |
+
+### GitHub Apps & Tools
+
+Das Projekt nutzt folgende integrierte GitHub Features:
+
+- ✅ **Dependabot** - Automatische Dependency-Updates für NuGet und GitHub Actions
+- ✅ **CodeQL** - Sicherheitsscan für Schwachstellen und Code-Fehler
+- ✅ **Release Drafter** - Automatische Generierung von Release Notes
+- ✅ **Code Coverage** - Test Coverage Reporting (Cobertura XML)
+- ✅ **Docker CI/CD** - Automatische Docker Builds zu GitHub Container Registry
+- ✅ **Stale Bot** - Verwaltung inaktiver Issues und Pull Requests
+
+**Empfohlene Marketplace Apps (Optional):**
+- **Codecov** - Visuelles Coverage-Reporting (erfordert CODECOV_TOKEN Secret)
+- **SonarCloud** - Code-Qualitätsanalyse (erfordert SONAR_TOKEN Secret)
 
 ### Schnell-Deployment
 
-**Docker verwenden:**
+**Mit Docker (Empfohlen):**
 ```bash
+# Docker Compose verwenden
 docker-compose up
 # API läuft auf http://localhost:5215
+
+# Oder mit Docker direkt
+docker build -t terminplaner-api .
+docker run -p 5215:5215 terminplaner-api
 ```
 
-**Android APK manuell erstellen:**
+**Docker Image von GHCR:**
 ```bash
+docker pull ghcr.io/mistalan/terminplaner/api:latest
+docker run -p 5215:5215 ghcr.io/mistalan/terminplaner/api:latest
+```
+
+**Android APK erstellen:**
+```bash
+# Über GitHub Actions (empfohlen):
+# 1. Gehe zu Actions → Deploy Android App → Run workflow
+# 2. Lade APK-Artifact herunter
+
+# Oder lokal:
 cd TerminplanerMaui
 dotnet publish -f net9.0-android -c Release
 ```
@@ -269,15 +308,14 @@ dotnet publish -f net9.0-android -c Release
 ```bash
 cd TerminplanerApi
 dotnet publish -c Release -o ./publish
+# Publish-Ordner auf Server kopieren
 ```
 
-### Vollständige Deployment-Anleitung
+### Konfiguration
 
-Für detaillierte Informationen zu CI/CD-Workflows, automatisiertem Deployment und Update-Strategien siehe **[DEPLOYMENT.md](DEPLOYMENT.md)**
-
-### GitHub Apps Integration
-
-Das Projekt nutzt verschiedene GitHub Apps zur Verbesserung von Code-Qualität und Entwicklungsprozessen. Für eine vollständige Liste empfohlener Apps siehe **[GITHUB_APPS_RECOMMENDATIONS.md](GITHUB_APPS_RECOMMENDATIONS.md)**
+**Benötigte Secrets (alle optional):**
+- `CODECOV_TOKEN` - Für Codecov Coverage-Uploads (nur wenn Codecov App installiert)
+- Signing-Secrets für Android/Windows sind für spätere Store-Veröffentlichung vorbereitet (aktuell nicht benötigt)
 
 ## 📝 Lizenz
 
