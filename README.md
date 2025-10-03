@@ -157,6 +157,7 @@ Terminplaner/
 ├── .github/
 │   ├── workflows/          # CI/CD Workflows (CI, Coverage, CodeQL, Docker, etc.)
 │   ├── dependabot.yml      # Dependency update configuration
+│   ├── labels.yml          # GitHub labels configuration
 │   ├── release-drafter.yml # Release notes configuration
 │   └── copilot-instructions.md
 │
@@ -254,6 +255,7 @@ Das Projekt verfügt über automatisierte GitHub Actions Workflows für:
 | **CodeQL Security** | Push/PR to main, Weekly | Sicherheitsanalyse für C# Code |
 | **Docker Build** | Push to main, Tags | Baut und pusht Docker Image zu GHCR |
 | **Release Drafter** | Push to main, PRs | Erstellt automatisch Release-Notizen |
+| **Label Sync** | Push to main (labels.yml), Manual | Synchronisiert Repository-Labels |
 | **Stale Bot** | Täglich | Schließt inaktive Issues/PRs nach 60/30 Tagen |
 | **Deploy API** | Tags `v*.*.*`, Manual | Erstellt Linux/Windows API Packages |
 | **Deploy Android** | Tags `android-v*.*.*`, Manual | Baut APK für Android |
@@ -266,6 +268,7 @@ Das Projekt nutzt folgende integrierte GitHub Features:
 - ✅ **Dependabot** - Automatische Dependency-Updates für NuGet und GitHub Actions
 - ✅ **CodeQL** - Sicherheitsscan für Schwachstellen und Code-Fehler
 - ✅ **Release Drafter** - Automatische Generierung von Release Notes
+- ✅ **Label Sync** - Automatische Synchronisierung von Repository-Labels
 - ✅ **Code Coverage** - Test Coverage Reporting (Cobertura XML)
 - ✅ **Docker CI/CD** - Automatische Docker Builds zu GitHub Container Registry
 - ✅ **Stale Bot** - Verwaltung inaktiver Issues und Pull Requests

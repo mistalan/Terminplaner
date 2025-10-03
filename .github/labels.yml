@@ -1,0 +1,132 @@
+# GitHub Repository Labels Configuration
+# This file defines all labels used in the repository
+# Used by label-sync workflow to ensure labels exist
+
+# Dependency Management
+- name: dependencies
+  description: Pull requests that update a dependency file
+  color: '0366d6'
+
+- name: backend
+  description: Backend API related changes
+  color: 'fbca04'
+
+- name: frontend
+  description: Frontend MAUI app related changes
+  color: '0e8a16'
+
+- name: tests
+  description: Test-related changes
+  color: 'd73a4a'
+
+- name: github-actions
+  description: GitHub Actions workflow updates
+  color: '000000'
+
+# Feature Development
+- name: feature
+  description: New feature or request
+  color: 'a2eeef'
+
+- name: enhancement
+  description: Improvement to existing functionality
+  color: 'a2eeef'
+
+- name: feat
+  description: New feature (conventional commits)
+  color: 'a2eeef'
+
+# Bug Fixes
+- name: fix
+  description: Bug fix
+  color: 'd73a4a'
+
+- name: bugfix
+  description: Bug fix
+  color: 'd73a4a'
+
+- name: bug
+  description: Something isn't working
+  color: 'd73a4a'
+
+# Documentation
+- name: documentation
+  description: Improvements or additions to documentation
+  color: '0075ca'
+
+- name: docs
+  description: Documentation changes
+  color: '0075ca'
+
+# Maintenance
+- name: chore
+  description: Maintenance tasks
+  color: 'fef2c0'
+
+- name: refactor
+  description: Code refactoring
+  color: 'fef2c0'
+
+# Performance
+- name: performance
+  description: Performance improvements
+  color: 'c5def5'
+
+- name: perf
+  description: Performance related
+  color: 'c5def5'
+
+# Security
+- name: security
+  description: Security-related changes
+  color: 'ee0701'
+
+# Version Control (Semantic Versioning)
+- name: major
+  description: Major version bump (breaking changes)
+  color: 'b60205'
+
+- name: breaking
+  description: Breaking change
+  color: 'b60205'
+
+- name: minor
+  description: Minor version bump (new features)
+  color: '0e8a16'
+
+- name: patch
+  description: Patch version bump (bug fixes)
+  color: 'c5def5'
+
+# Issue Management
+- name: pinned
+  description: Issue or PR that should not be marked as stale
+  color: 'ffd700'
+
+- name: help-wanted
+  description: Extra attention is needed
+  color: '008672'
+
+- name: work-in-progress
+  description: Work in progress, do not merge
+  color: 'fbca04'
+
+- name: good-first-issue
+  description: Good for newcomers
+  color: '7057ff'
+
+- name: duplicate
+  description: This issue or pull request already exists
+  color: 'cfd3d7'
+
+- name: invalid
+  description: This doesn't seem right
+  color: 'e4e669'
+
+- name: wontfix
+  description: This will not be worked on
+  color: 'ffffff'
+
+- name: question
+  description: Further information is requested
+  color: 'd876e3'
