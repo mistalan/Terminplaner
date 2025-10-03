@@ -69,3 +69,6 @@ app.MapPut("/api/appointments/priorities", (Dictionary<int, int> priorities, App
 .WithName("UpdatePriorities");
 
 app.Run();
+
+// Make Program class accessible for integration tests
+public partial class Program { }
