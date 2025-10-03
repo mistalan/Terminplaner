@@ -10,9 +10,11 @@
 - **Target Framework**: .NET 9.0
 - **Project Structure**: 
   - **TerminplanerApi**: ASP.NET Core Web API with minimal API pattern (backend)
+  - **TerminplanerApi.Tests**: xUnit test project with unit and integration tests
   - **TerminplanerMaui**: .NET MAUI cross-platform app (frontend)
 - **Size**: Small personal project
 - **Repository State**: Active development with both backend and frontend projects
+- **Test Coverage**: 42 tests (23 unit tests, 19 integration tests) with 100% pass rate
 
 ### Technology Stack
 - **Runtime**: .NET SDK 9.0.x or later
@@ -47,8 +49,9 @@ dotnet --list-sdks
 
 ### Creating a New Project
 
-The project already exists with two main components:
+The project already exists with three main components:
 - **TerminplanerApi**: Backend Web API
+- **TerminplanerApi.Tests**: Test project with unit and integration tests
 - **TerminplanerMaui**: Frontend MAUI app
 
 If you need to add additional projects to the solution:
@@ -136,18 +139,60 @@ dotnet build --configuration Release
 
 ### Testing Commands
 
+**IMPORTANT**: Tests MUST be executed after each build. A pull request is only considered 'Done' if all tests succeed.
+
 **Run tests:**
 ```bash
 dotnet test
 ```
 - Runs all test projects in the solution
-- Currently no test projects exist in this repository
-- Takes ~4-5 seconds when no tests exist
+- **42 tests** total (23 unit tests, 19 integration tests)
+- Takes ~3-5 seconds to run all tests
+- **Exit code 0** indicates all tests passed
+- **IMPORTANT**: All tests must pass before committing code changes
 
 **Run tests with detailed output:**
 ```bash
 dotnet test --logger "console;verbosity=detailed"
 ```
+- Provides detailed test execution information
+- Useful for debugging test failures
+
+**Run specific test:**
+```bash
+dotnet test --filter "TC_U001"
+```
+- Runs a single test by name
+- Test naming convention: TC_<Type><Number>_<Description>
+  - TC_U###: Unit test
+  - TC_I###: Integration test
+  - TC_E###: Edge case test
+
+**Run only unit tests:**
+```bash
+dotnet test --filter "FullyQualifiedName~AppointmentServiceTests"
+```
+- Runs all 23 unit tests for AppointmentService
+
+**Run only integration tests:**
+```bash
+dotnet test --filter "FullyQualifiedName~AppointmentApiIntegrationTests"
+```
+- Runs all 19 integration tests for API endpoints
+
+**Test project location:**
+- Tests are in `TerminplanerApi.Tests/` directory
+- Test documentation: See [TEST_CASES.md](../TEST_CASES.md) and [TerminplanerApi.Tests/README.md](../TerminplanerApi.Tests/README.md)
+
+**Test coverage:**
+- **Unit Tests (23)**: AppointmentService business logic
+  - GetAll, GetById, Create, Update, Delete, UpdatePriorities
+  - Edge cases: empty text, null category
+- **Integration Tests (19)**: API endpoints
+  - GET /api/appointments, GET /api/appointments/{id}
+  - POST /api/appointments, PUT /api/appointments/{id}
+  - DELETE /api/appointments/{id}, PUT /api/appointments/priorities
+  - CORS configuration
 
 ### Code Formatting and Linting
 
@@ -229,10 +274,12 @@ dotnet watch run
 ├── .gitignore          # Visual Studio/C# gitignore patterns (comprehensive)
 ├── README.md           # Project documentation
 ├── QUICKSTART.md       # Quick start guide
-├── Terminplaner.sln    # Solution file containing both projects
+├── TEST_CASES.md       # Detailed test case documentation
+├── Terminplaner.sln    # Solution file containing all projects
 ├── .github/
 │   └── copilot-instructions.md  # This file
 ├── TerminplanerApi/    # Backend Web API project
+├── TerminplanerApi.Tests/  # Test project (unit & integration tests)
 └── TerminplanerMaui/   # Frontend MAUI app project
 ```
 
@@ -253,6 +300,29 @@ TerminplanerApi/
 ├── bin/                # Build output (ignored by git)
 └── obj/                # Intermediate build files (ignored by git)
 ```
+
+### Test Project Structure (TerminplanerApi.Tests)
+```
+TerminplanerApi.Tests/
+├── AppointmentServiceTests.cs  # Unit tests (23 tests)
+├── AppointmentApiIntegrationTests.cs  # Integration tests (19 tests)
+├── README.md           # Test documentation
+├── TerminplanerApi.Tests.csproj  # Test project file
+├── bin/                # Build output (ignored by git)
+└── obj/                # Intermediate build files (ignored by git)
+```
+
+**Test Framework:**
+- xUnit 2.4.2 - Modern testing framework for .NET
+- Microsoft.AspNetCore.Mvc.Testing 9.0.9 - WebApplicationFactory for integration testing
+- Microsoft.NET.Test.Sdk 17.8.0 - Test SDK
+- coverlet.collector 6.0.0 - Code coverage collector
+
+**Test Naming Convention:**
+- Pattern: `TC_<Type><Number>_<Description>`
+- TC_U###: Unit test (e.g., TC_U001_GetAll_ReturnsEmptyList_WhenNoAppointmentsExist)
+- TC_I###: Integration test (e.g., TC_I007_PostAppointment_Returns201Created)
+- TC_E###: Edge case test (e.g., TC_E001_Create_HandlesEmptyText)
 
 ### Frontend MAUI Project Structure (TerminplanerMaui)
 ```
@@ -297,6 +367,13 @@ TerminplanerMaui/
 - Defines target framework (net9.0)
 - Lists NuGet package dependencies
 - Uses Microsoft.NET.Sdk.Web SDK
+- Contains `public partial class Program { }` for integration testing
+
+**TerminplanerApi.Tests.csproj**
+- Test project targeting net9.0
+- References TerminplanerApi project
+- Uses xUnit as testing framework
+- Includes Microsoft.AspNetCore.Mvc.Testing for integration tests
 
 **appsettings.json**
 - Application configuration
@@ -341,6 +418,8 @@ TerminplanerMaui/
 
 **Recommended validation sequence before committing:**
 
+**CRITICAL**: All tests MUST pass before code can be committed. A pull request is only considered 'Done' if all tests succeed.
+
 1. **Format code:**
    ```bash
    # Format API
@@ -350,6 +429,10 @@ TerminplanerMaui/
    # Format MAUI
    cd ../TerminplanerMaui
    dotnet format
+   
+   # Format Tests
+   cd ../TerminplanerApi.Tests
+   dotnet format
    ```
 
 2. **Clean and build API:**
@@ -358,23 +441,33 @@ TerminplanerMaui/
    dotnet clean && dotnet build
    ```
 
-3. **Build MAUI (optional, requires workloads):**
+3. **Build test project:**
+   ```bash
+   cd ../TerminplanerApi.Tests
+   dotnet build
+   ```
+
+4. **Run tests (MANDATORY):**
+   ```bash
+   cd ..
+   dotnet test
+   ```
+   - **CRITICAL**: All 42 tests MUST pass (exit code 0)
+   - If any test fails, fix the issue before committing
+   - Test failures indicate broken functionality
+
+5. **Build MAUI (optional, requires workloads):**
    ```bash
    cd TerminplanerMaui
    dotnet build -f net9.0-android
    ```
 
-4. **Run tests (if they exist):**
-   ```bash
-   dotnet test
-   ```
-
-5. **Verify formatting:**
+6. **Verify formatting:**
    ```bash
    dotnet format --verify-no-changes
    ```
 
-All commands should complete successfully with exit code 0.
+All commands should complete successfully with exit code 0. **Tests are mandatory and must pass.**
 
 ## Common Issues and Troubleshooting
 
@@ -438,21 +531,25 @@ All commands should complete successfully with exit code 0.
 
 ### Always Do:
 1. **Run `dotnet build` before and after making code changes** to verify compilation
-2. **Build API and MAUI projects separately** - API can be built without MAUI workloads
-3. **Run `dotnet format` before committing** to ensure code style consistency
-4. **Use `dotnet clean` if encountering mysterious build errors**
-5. **Check project directory structure** - commands must run from correct location (TerminplanerApi or TerminplanerMaui)
-6. **Read the .csproj files** to understand dependencies and target frameworks
-7. **Verify all paths are absolute** when working with files
-8. **Ensure API is running** before starting the MAUI app for testing
+2. **Run `dotnet test` after every code change** - all 42 tests MUST pass
+3. **Build API and MAUI projects separately** - API can be built without MAUI workloads
+4. **Run `dotnet format` before committing** to ensure code style consistency
+5. **Use `dotnet clean` if encountering mysterious build errors**
+6. **Check project directory structure** - commands must run from correct location (TerminplanerApi, TerminplanerApi.Tests, or TerminplanerMaui)
+7. **Read the .csproj files** to understand dependencies and target frameworks
+8. **Verify all paths are absolute** when working with files
+9. **Ensure API is running** before starting the MAUI app for testing
+10. **Verify test coverage** - if you add new functionality, add corresponding tests
 
 ### Never Do:
 1. **Never commit bin/ or obj/ directories** - they're in .gitignore for a reason
 2. **Never commit secrets** in appsettings.json or code
 3. **Never modify .csproj manually** without understanding XML structure - use `dotnet add package` instead
-4. **Never assume test projects exist** - verify first with `dotnet test`
-5. **Never use `git reset --hard` or `git rebase`** - force push is not available
-6. **Never assume MAUI workloads are available in CI** - focus on API builds in CI environments
+4. **Never commit code without running tests** - all 42 tests must pass
+5. **Never skip test execution** - tests are mandatory for every PR
+6. **Never use `git reset --hard` or `git rebase`** - force push is not available
+7. **Never assume MAUI workloads are available in CI** - focus on API builds in CI environments
+8. **Never break existing tests** - if a test fails after your change, fix your code or update the test appropriately
 
 ### Project-Specific Patterns
 
@@ -502,29 +599,45 @@ All commands should complete successfully with exit code 0.
 
 | Command | Purpose | Time | Exit Code |
 |---------|---------|------|-----------|
-| `dotnet test` | Run all tests | 4-5s | 0 (no tests exist) |
+| `dotnet test` | Run all tests (MANDATORY) | 3-5s | 0 if all 42 tests pass |
+| `dotnet test --logger "console;verbosity=detailed"` | Run tests with details | 3-5s | 0 if all tests pass |
+| `dotnet test --filter "TC_U001"` | Run specific test | <1s | 0 if test passes |
+| `dotnet test --filter "FullyQualifiedName~AppointmentServiceTests"` | Run unit tests only | 2-3s | 0 if all unit tests pass |
+| `dotnet test --filter "FullyQualifiedName~AppointmentApiIntegrationTests"` | Run integration tests only | 2-3s | 0 if all integration tests pass |
 | `dotnet format --verify-no-changes` | Check formatting | 2-3s | 0 if formatted |
 | `dotnet format` | Format all code | 2-3s | 0 |
 
 ## Trust These Instructions
 
 These instructions have been validated by:
-- Examining the actual project structure with both API and MAUI projects
+- Examining the actual project structure with API, Tests, and MAUI projects
 - Building and running the API project successfully
-- Reviewing the README.md and QUICKSTART.md documentation
-- Verifying project files (TerminplanerApi.csproj and TerminplanerMaui.csproj)
+- Running all 42 tests successfully (100% pass rate)
+- Reviewing the README.md, QUICKSTART.md, and TEST_CASES.md documentation
+- Verifying project files (TerminplanerApi.csproj, TerminplanerApi.Tests.csproj, and TerminplanerMaui.csproj)
 - Confirming available .NET SDKs in the CI environment
 
 **Architecture Notes:**
-- The repository contains TWO main projects: TerminplanerApi (backend) and TerminplanerMaui (frontend)
+- The repository contains THREE main projects: TerminplanerApi (backend), TerminplanerApi.Tests (tests), and TerminplanerMaui (frontend)
 - The API uses minimal API pattern (no controllers)
+- The test project uses xUnit with WebApplicationFactory for integration testing
+- **42 comprehensive tests** cover AppointmentService business logic and API endpoints
 - The MAUI app uses MVVM pattern with CommunityToolkit.Mvvm
 - The MAUI app communicates with the API via REST calls
 - Target platforms: Android, iOS, Windows, macOS
+
+**Testing Requirements:**
+- **All 42 tests MUST pass** before code can be committed
+- Tests are executed with `dotnet test` command
+- 23 unit tests cover AppointmentService business logic
+- 19 integration tests cover API endpoints end-to-end
+- A pull request is only considered 'Done' if all tests succeed
+- Test documentation available in TEST_CASES.md and TerminplanerApi.Tests/README.md
 
 **CI/CD Considerations:**
 - MAUI workloads may not be available in all CI environments
 - Focus on building and testing the API project in CI
 - MAUI builds require platform-specific SDKs and emulators
+- Tests can run in CI without MAUI workloads (they only test the API)
 
 **If you encounter issues not covered here, check README.md and QUICKSTART.md first. Only if the information is incomplete or incorrect should you perform additional exploration.**
