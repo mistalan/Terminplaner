@@ -1,0 +1,97 @@
+# Android Deployment Workflow
+# Builds and publishes the MAUI Android app (APK)
+
+name: Deploy Android App
+
+on:
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Build configuration'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Debug
+  push:
+    tags:
+      - 'android-v*.*.*'
+
+jobs:
+  build-android:
+    name: Build Android APK
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Install MAUI workload
+      run: dotnet workload install maui-android
+
+    - name: Restore dependencies
+      run: |
+        cd TerminplanerMaui
+        dotnet restore -f net9.0-android
+
+    - name: Build Android app
+      run: |
+        cd TerminplanerMaui
+        dotnet build -f net9.0-android -c ${{ github.event.inputs.configuration || 'Release' }}
+
+    - name: Publish Android app (APK)
+      run: |
+        cd TerminplanerMaui
+        dotnet publish -f net9.0-android -c ${{ github.event.inputs.configuration || 'Release' }}
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: terminplaner-android-apk
+        path: |
+          TerminplanerMaui/bin/${{ github.event.inputs.configuration || 'Release' }}/net9.0-android/**/*.apk
+        retention-days: 90
+
+  # Optional: Build signed APK for Play Store
+  # Uncomment and configure when ready for store deployment
+  # build-android-signed:
+  #   name: Build Signed Android APK
+  #   runs-on: windows-latest
+  #   if: startsWith(github.ref, 'refs/tags/android-v')
+  #
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+  #
+  #   - name: Setup .NET
+  #     uses: actions/setup-dotnet@v4
+  #     with:
+  #       dotnet-version: 9.0.x
+  #
+  #   - name: Install MAUI workload
+  #     run: dotnet workload install maui-android
+  #
+  #   - name: Decode signing certificate
+  #     run: |
+  #       $keystore_bytes = [System.Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}")
+  #       [IO.File]::WriteAllBytes("${{ github.workspace }}/signing.keystore", $keystore_bytes)
+  #
+  #   - name: Build signed APK
+  #     run: |
+  #       cd TerminplanerMaui
+  #       dotnet publish -f net9.0-android -c Release /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ github.workspace }}/signing.keystore" /p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} /p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+  #
+  #   - name: Remove keystore
+  #     run: Remove-Item -Path "${{ github.workspace }}/signing.keystore"
+  #
+  #   - name: Upload signed APK
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: terminplaner-android-signed
+  #       path: TerminplanerMaui/bin/Release/net9.0-android/publish/*.apk

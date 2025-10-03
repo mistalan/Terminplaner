@@ -232,28 +232,32 @@ dotnet test
 - **Zukunftssicher** - Microsoft's neueste Cross-Platform-Technologie
 - **Android-Ready** - Einfaches Deployment auf Android-Geräte
 
-## 🔧 Android Deployment
+## 🔧 Deployment & CI/CD
 
-Um die App auf einem Android-Gerät zu installieren:
+Das Projekt verfügt über automatisierte GitHub Actions Workflows für:
 
-1. **Debug-Build erstellen:**
-   ```bash
-   cd TerminplanerMaui
-   dotnet publish -f net9.0-android -c Release
-   ```
+- ✅ **Continuous Integration** - Automatische Tests bei jedem Push/PR
+- 📦 **API Deployment** - Backend-Deployment für Linux und Windows
+- 📱 **Android Deployment** - APK-Generierung für Android-Geräte
+- 🖥️ **Windows Deployment** - MSIX/Installer für Windows Desktop
 
-2. **APK finden:**
-   Die APK-Datei befindet sich unter:
-   ```
-   bin/Release/net9.0-android/publish/
-   ```
+### Schnell-Deployment
 
-3. **Auf Gerät installieren:**
-   - Kopiere die APK auf dein Android-Gerät
-   - Aktiviere "Installation aus unbekannten Quellen" in den Einstellungen
-   - Installiere die APK
+**Android APK manuell erstellen:**
+```bash
+cd TerminplanerMaui
+dotnet publish -f net9.0-android -c Release
+```
 
-Für Play Store Deployment ist ein signiertes Release-Build erforderlich.
+**API manuell deployen:**
+```bash
+cd TerminplanerApi
+dotnet publish -c Release -o ./publish
+```
+
+### Vollständige Deployment-Anleitung
+
+Für detaillierte Informationen zu CI/CD-Workflows, automatisiertem Deployment und Update-Strategien siehe **[DEPLOYMENT.md](DEPLOYMENT.md)**
 
 ## 📝 Lizenz
 

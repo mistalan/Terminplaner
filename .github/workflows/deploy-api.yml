@@ -1,0 +1,83 @@
+# API Deployment Workflow
+# Builds and publishes the ASP.NET Core API for deployment
+
+name: Deploy API
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+          - development
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-api:
+    name: Build and Package API
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Restore dependencies
+      run: |
+        cd TerminplanerApi
+        dotnet restore
+
+    - name: Run tests
+      run: |
+        dotnet test TerminplanerApi.Tests/TerminplanerApi.Tests.csproj --configuration Release
+
+    - name: Publish API (Linux)
+      run: |
+        cd TerminplanerApi
+        dotnet publish --configuration Release --output ./publish/linux-x64 --runtime linux-x64 --self-contained false
+
+    - name: Publish API (Windows)
+      run: |
+        cd TerminplanerApi
+        dotnet publish --configuration Release --output ./publish/win-x64 --runtime win-x64 --self-contained false
+
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-linux-x64
+        path: TerminplanerApi/publish/linux-x64/
+        retention-days: 30
+
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-win-x64
+        path: TerminplanerApi/publish/win-x64/
+        retention-days: 30
+
+    - name: Create deployment package
+      run: |
+        cd TerminplanerApi/publish
+        tar -czf ../terminplaner-api-linux-x64.tar.gz -C linux-x64 .
+        cd ../
+        zip -r terminplaner-api-win-x64.zip publish/win-x64/*
+
+    - name: Upload deployment packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-packages
+        path: |
+          TerminplanerApi/terminplaner-api-linux-x64.tar.gz
+          TerminplanerApi/terminplaner-api-win-x64.zip
+        retention-days: 90
