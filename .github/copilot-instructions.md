@@ -14,7 +14,7 @@
   - **TerminplanerMaui**: .NET MAUI cross-platform app (frontend)
 - **Size**: Small personal project
 - **Repository State**: Active development with both backend and frontend projects
-- **Test Coverage**: 42 tests (23 unit tests, 19 integration tests) with 100% pass rate
+- **Test Coverage**: Comprehensive unit and integration tests with 100% pass rate
 
 ### Technology Stack
 - **Runtime**: .NET SDK 9.0.x or later
@@ -139,14 +139,14 @@ dotnet build --configuration Release
 
 ### Testing Commands
 
-**IMPORTANT**: Tests MUST be executed after each build. A pull request is only considered 'Done' if all tests succeed.
+**IMPORTANT**: Tests MUST be executed after each build. A pull request will only be merged if all tests succeed.
 
 **Run tests:**
 ```bash
 dotnet test
 ```
 - Runs all test projects in the solution
-- **42 tests** total (23 unit tests, 19 integration tests)
+- Currently includes unit tests and integration tests
 - Takes ~3-5 seconds to run all tests
 - **Exit code 0** indicates all tests passed
 - **IMPORTANT**: All tests must pass before committing code changes
@@ -172,13 +172,13 @@ dotnet test --filter "TC_U001"
 ```bash
 dotnet test --filter "FullyQualifiedName~AppointmentServiceTests"
 ```
-- Runs all 23 unit tests for AppointmentService
+- Runs all unit tests for AppointmentService
 
 **Run only integration tests:**
 ```bash
 dotnet test --filter "FullyQualifiedName~AppointmentApiIntegrationTests"
 ```
-- Runs all 19 integration tests for API endpoints
+- Runs all integration tests for API endpoints
 
 **Test project location:**
 - Tests are in `TerminplanerApi.Tests/` directory
@@ -418,7 +418,7 @@ TerminplanerMaui/
 
 **Recommended validation sequence before committing:**
 
-**CRITICAL**: All tests MUST pass before code can be committed. A pull request is only considered 'Done' if all tests succeed.
+**CRITICAL**: All tests MUST pass before code can be committed. A pull request will only be merged if all tests succeed.
 
 1. **Format code:**
    ```bash
@@ -452,7 +452,7 @@ TerminplanerMaui/
    cd ..
    dotnet test
    ```
-   - **CRITICAL**: All 42 tests MUST pass (exit code 0)
+   - **CRITICAL**: All tests MUST pass (exit code 0)
    - If any test fails, fix the issue before committing
    - Test failures indicate broken functionality
 
@@ -531,7 +531,7 @@ All commands should complete successfully with exit code 0. **Tests are mandator
 
 ### Always Do:
 1. **Run `dotnet build` before and after making code changes** to verify compilation
-2. **Run `dotnet test` after every code change** - all 42 tests MUST pass
+2. **Run `dotnet test` after every code change** - all tests MUST pass
 3. **Build API and MAUI projects separately** - API can be built without MAUI workloads
 4. **Run `dotnet format` before committing** to ensure code style consistency
 5. **Use `dotnet clean` if encountering mysterious build errors**
@@ -545,7 +545,7 @@ All commands should complete successfully with exit code 0. **Tests are mandator
 1. **Never commit bin/ or obj/ directories** - they're in .gitignore for a reason
 2. **Never commit secrets** in appsettings.json or code
 3. **Never modify .csproj manually** without understanding XML structure - use `dotnet add package` instead
-4. **Never commit code without running tests** - all 42 tests must pass
+4. **Never commit code without running tests** - all tests must pass
 5. **Never skip test execution** - tests are mandatory for every PR
 6. **Never use `git reset --hard` or `git rebase`** - force push is not available
 7. **Never assume MAUI workloads are available in CI** - focus on API builds in CI environments
@@ -599,7 +599,7 @@ All commands should complete successfully with exit code 0. **Tests are mandator
 
 | Command | Purpose | Time | Exit Code |
 |---------|---------|------|-----------|
-| `dotnet test` | Run all tests (MANDATORY) | 3-5s | 0 if all 42 tests pass |
+| `dotnet test` | Run all tests (MANDATORY) | 3-5s | 0 if all tests pass |
 | `dotnet test --logger "console;verbosity=detailed"` | Run tests with details | 3-5s | 0 if all tests pass |
 | `dotnet test --filter "TC_U001"` | Run specific test | <1s | 0 if test passes |
 | `dotnet test --filter "FullyQualifiedName~AppointmentServiceTests"` | Run unit tests only | 2-3s | 0 if all unit tests pass |
@@ -612,7 +612,7 @@ All commands should complete successfully with exit code 0. **Tests are mandator
 These instructions have been validated by:
 - Examining the actual project structure with API, Tests, and MAUI projects
 - Building and running the API project successfully
-- Running all 42 tests successfully (100% pass rate)
+- Running all tests successfully (100% pass rate)
 - Reviewing the README.md, QUICKSTART.md, and TEST_CASES.md documentation
 - Verifying project files (TerminplanerApi.csproj, TerminplanerApi.Tests.csproj, and TerminplanerMaui.csproj)
 - Confirming available .NET SDKs in the CI environment
@@ -621,17 +621,17 @@ These instructions have been validated by:
 - The repository contains THREE main projects: TerminplanerApi (backend), TerminplanerApi.Tests (tests), and TerminplanerMaui (frontend)
 - The API uses minimal API pattern (no controllers)
 - The test project uses xUnit with WebApplicationFactory for integration testing
-- **42 comprehensive tests** cover AppointmentService business logic and API endpoints
+- **Comprehensive test suite** covers AppointmentService business logic and API endpoints
 - The MAUI app uses MVVM pattern with CommunityToolkit.Mvvm
 - The MAUI app communicates with the API via REST calls
 - Target platforms: Android, iOS, Windows, macOS
 
 **Testing Requirements:**
-- **All 42 tests MUST pass** before code can be committed
+- **All tests MUST pass** before code can be committed
 - Tests are executed with `dotnet test` command
-- 23 unit tests cover AppointmentService business logic
-- 19 integration tests cover API endpoints end-to-end
-- A pull request is only considered 'Done' if all tests succeed
+- Unit tests cover AppointmentService business logic
+- Integration tests cover API endpoints end-to-end
+- A pull request will only be merged if all tests succeed
 - Test documentation available in TEST_CASES.md and TerminplanerApi.Tests/README.md
 
 **CI/CD Considerations:**
