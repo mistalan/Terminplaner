@@ -1,5 +1,11 @@
 # 📅 Terminplaner
 
+[![CI Status](https://github.com/mistalan/Terminplaner/workflows/CI%20-%20Build%20and%20Test/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/mistalan/Terminplaner/workflows/CodeQL%20Security%20Analysis/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/codeql.yml)
+[![Docker](https://github.com/mistalan/Terminplaner/workflows/Docker%20Build%20and%20Push/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/docker.yml)
+[![.NET Version](https://img.shields.io/badge/.NET-9.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/9.0)
+[![License](https://img.shields.io/github/license/mistalan/Terminplaner)](LICENSE)
+
 Moderne Terminplaner-App für die Verwaltung von Terminen mit Kategorien und Prioritäten.
 
 Entwickelt als Alternative zum Word-Dokument-System - mit allen vertrauten Features, aber in einer modernen Cross-Platform-App die auf PC, Android, iOS und mehr funktioniert!
@@ -237,11 +243,21 @@ dotnet test
 Das Projekt verfügt über automatisierte GitHub Actions Workflows für:
 
 - ✅ **Continuous Integration** - Automatische Tests bei jedem Push/PR
+- 🔒 **Security Scanning** - CodeQL-Analyse für Sicherheitslücken
+- 📊 **Code Coverage** - Automatische Coverage-Reports
+- 🐳 **Docker** - Containerisierung der API
 - 📦 **API Deployment** - Backend-Deployment für Linux und Windows
 - 📱 **Android Deployment** - APK-Generierung für Android-Geräte
 - 🖥️ **Windows Deployment** - MSIX/Installer für Windows Desktop
+- 🔄 **Dependabot** - Automatische Dependency-Updates
 
 ### Schnell-Deployment
+
+**Docker verwenden:**
+```bash
+docker-compose up
+# API läuft auf http://localhost:5215
+```
 
 **Android APK manuell erstellen:**
 ```bash
@@ -258,6 +274,10 @@ dotnet publish -c Release -o ./publish
 ### Vollständige Deployment-Anleitung
 
 Für detaillierte Informationen zu CI/CD-Workflows, automatisiertem Deployment und Update-Strategien siehe **[DEPLOYMENT.md](DEPLOYMENT.md)**
+
+### GitHub Apps Integration
+
+Das Projekt nutzt verschiedene GitHub Apps zur Verbesserung von Code-Qualität und Entwicklungsprozessen. Für eine vollständige Liste empfohlener Apps siehe **[GITHUB_APPS_RECOMMENDATIONS.md](GITHUB_APPS_RECOMMENDATIONS.md)**
 
 ## 📝 Lizenz
 
