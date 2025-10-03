@@ -1,0 +1,54 @@
+# .dockerignore
+# Exclude files and directories from Docker build context
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# IDE and editor files
+.vs/
+.vscode/
+*.suo
+*.user
+*.userprefs
+*.sln.docstates
+*.swp
+*~
+
+# Test results
+**/TestResults/
+**/*.trx
+**/*.coverage
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# Documentation
+*.md
+!README.md
+DEPLOYMENT.md
+QUICKSTART.md
+TEST_CASES.md
+GITHUB_APPS_RECOMMENDATIONS.md
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# MAUI (not needed for API container)
+TerminplanerMaui/
+
+# Other
+*.log
+*.tmp
+node_modules/
