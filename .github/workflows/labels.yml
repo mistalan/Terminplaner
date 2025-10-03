@@ -3,7 +3,7 @@ name: Sync Labels
 # This workflow ensures all required labels exist in the repository
 # Triggered on pushes to main or can be run manually
 
-on:
+'on':
   push:
     branches:
       - main

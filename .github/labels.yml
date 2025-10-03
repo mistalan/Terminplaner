@@ -19,6 +19,10 @@
   description: Test-related changes
   color: 'd73a4a'
 
+- name: test
+  description: Test changes
+  color: 'd73a4a'
+
 - name: github-actions
   description: GitHub Actions workflow updates
   color: '000000'
