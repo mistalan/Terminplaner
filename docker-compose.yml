@@ -1,0 +1,23 @@
+# Docker Compose for local development
+# Runs the Terminplaner API in a container
+
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: terminplaner-api
+    ports:
+      - "5215:5215"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5215
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5215/api/appointments"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
