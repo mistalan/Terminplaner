@@ -157,6 +157,11 @@ Terminplaner/
 │   ├── Program.cs                # API-Konfiguration & Endpoints
 │   └── TerminplanerApi.csproj    # Backend-Projekt-Datei
 │
+├── TerminplanerApi.Tests/        # Tests für Backend API
+│   ├── AppointmentServiceTests.cs      # Unit Tests
+│   ├── AppointmentApiIntegrationTests.cs # Integration Tests
+│   └── TerminplanerApi.Tests.csproj    # Test-Projekt-Datei
+│
 ├── TerminplanerMaui/             # Cross-Platform MAUI App
 │   ├── Models/
 │   │   └── Appointment.cs        # Client-seitiges Datenmodell
@@ -184,9 +189,25 @@ Terminplaner/
 │   ├── MauiProgram.cs            # App-Initialisierung
 │   └── TerminplanerMaui.csproj   # MAUI-Projekt-Datei
 │
+├── TEST_CASES.md                 # Dokumentation aller Test-Fälle
 ├── README.md                     # Diese Datei
 └── QUICKSTART.md                 # Schnellstart-Anleitung
 ```
+
+## 🧪 Tests
+
+Das Projekt enthält umfassende Tests für die Backend-API:
+
+- **42 Tests** (100% bestanden)
+  - **23 Unit Tests** für AppointmentService
+  - **19 Integration Tests** für API Endpoints
+
+**Tests ausführen:**
+```bash
+dotnet test
+```
+
+**Detaillierte Test-Dokumentation:** Siehe [TEST_CASES.md](TEST_CASES.md)
 
 ## 🔮 Zukünftige Erweiterungen
 
