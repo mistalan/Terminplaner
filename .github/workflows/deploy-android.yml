@@ -2,6 +2,8 @@
 # Builds and publishes the MAUI Android app (APK)
 
 name: Deploy Android App
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
