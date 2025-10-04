@@ -23,13 +23,24 @@ public partial class EditAppointmentViewModel : ObservableObject
     private string editColor = "#808080";
 
     [ObservableProperty]
-    private DateTime? editScheduledDate;
+    private DateTime? editScheduledDate = DateTime.Today;
+
+    [ObservableProperty]
+    private TimeSpan editScheduledTime = new TimeSpan(9, 0, 0);
 
     [ObservableProperty]
     private string editDuration = string.Empty;
 
     [ObservableProperty]
     private bool editIsOutOfHome;
+
+    // Predefined colors for color picker
+    public List<string> AvailableColors { get; } = new()
+    {
+        "#FF0000", "#FF6B6B", "#FFA500", "#FFD700", "#00FF00", 
+        "#00CED1", "#0000FF", "#4B0082", "#8B008B", "#FF1493",
+        "#808080", "#A9A9A9", "#000000", "#FFFFFF"
+    };
 
     public EditAppointmentViewModel(AppointmentApiService apiService)
     {
@@ -43,10 +54,27 @@ public partial class EditAppointmentViewModel : ObservableObject
             EditText = value.Text;
             EditCategory = value.Category;
             EditColor = value.Color;
-            EditScheduledDate = value.ScheduledDate;
+            
+            if (value.ScheduledDate.HasValue)
+            {
+                EditScheduledDate = value.ScheduledDate.Value.Date;
+                EditScheduledTime = value.ScheduledDate.Value.TimeOfDay;
+            }
+            else
+            {
+                EditScheduledDate = DateTime.Today;
+                EditScheduledTime = new TimeSpan(9, 0, 0);
+            }
+            
             EditDuration = value.Duration ?? string.Empty;
             EditIsOutOfHome = value.IsOutOfHome;
         }
+    }
+
+    [RelayCommand]
+    private void SelectColor(string color)
+    {
+        EditColor = color;
     }
 
     [RelayCommand]
@@ -60,6 +88,13 @@ public partial class EditAppointmentViewModel : ObservableObject
             return;
         }
 
+        // Combine date and time
+        DateTime? scheduledDateTime = null;
+        if (EditScheduledDate.HasValue)
+        {
+            scheduledDateTime = EditScheduledDate.Value.Date + EditScheduledTime;
+        }
+
         var updatedAppointment = new Appointment
         {
             Id = Appointment.Id,
@@ -68,7 +103,7 @@ public partial class EditAppointmentViewModel : ObservableObject
             Color = EditColor,
             Priority = Appointment.Priority,
             CreatedAt = Appointment.CreatedAt,
-            ScheduledDate = EditScheduledDate,
+            ScheduledDate = scheduledDateTime,
             Duration = string.IsNullOrWhiteSpace(EditDuration) ? null : EditDuration,
             IsOutOfHome = EditIsOutOfHome
         };

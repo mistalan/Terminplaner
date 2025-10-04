@@ -23,7 +23,10 @@ public partial class MainViewModel : ObservableObject
     private string newAppointmentColor = "#808080";
 
     [ObservableProperty]
-    private DateTime? newAppointmentScheduledDate;
+    private DateTime? newAppointmentScheduledDate = DateTime.Today;
+
+    [ObservableProperty]
+    private TimeSpan newAppointmentScheduledTime = new TimeSpan(9, 0, 0);
 
     [ObservableProperty]
     private string newAppointmentDuration = string.Empty;
@@ -37,11 +40,35 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private Appointment? selectedAppointment;
 
-    public string CurrentDateDisplay => DateTime.Today.ToString("dddd, d. MMMM yyyy");
+    [ObservableProperty]
+    private DateTime currentViewDate = DateTime.Today;
+
+    [ObservableProperty]
+    private int daysToShow = 3;
+
+    public string CurrentDateDisplay => $"{CurrentViewDate:dddd, d. MMMM yyyy} - {CurrentViewDate.AddDays(DaysToShow - 1):dddd, d. MMMM yyyy}";
+
+    // Predefined colors for color picker
+    public List<string> AvailableColors { get; } = new()
+    {
+        "#FF0000", "#FF6B6B", "#FFA500", "#FFD700", "#00FF00", 
+        "#00CED1", "#0000FF", "#4B0082", "#8B008B", "#FF1493",
+        "#808080", "#A9A9A9", "#000000", "#FFFFFF"
+    };
 
     public MainViewModel(AppointmentApiService apiService)
     {
         _apiService = apiService;
+    }
+
+    partial void OnCurrentViewDateChanged(DateTime value)
+    {
+        OnPropertyChanged(nameof(CurrentDateDisplay));
+    }
+
+    partial void OnDaysToShowChanged(int value)
+    {
+        OnPropertyChanged(nameof(CurrentDateDisplay));
     }
 
     [RelayCommand]
@@ -52,7 +79,18 @@ public partial class MainViewModel : ObservableObject
         {
             var items = await _apiService.GetAllAppointmentsAsync();
             Appointments.Clear();
-            foreach (var item in items.OrderBy(a => a.Priority))
+            
+            // Filter appointments to show only those within the current view date range
+            var startDate = CurrentViewDate.Date;
+            var endDate = CurrentViewDate.AddDays(DaysToShow).Date;
+            
+            var filteredItems = items
+                .Where(a => !a.ScheduledDate.HasValue || 
+                           (a.ScheduledDate.Value.Date >= startDate && a.ScheduledDate.Value.Date < endDate))
+                .OrderBy(a => a.ScheduledDate ?? DateTime.MaxValue)
+                .ThenBy(a => a.Priority);
+            
+            foreach (var item in filteredItems)
             {
                 Appointments.Add(item);
             }
@@ -64,6 +102,43 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task GoToPreviousDayAsync()
+    {
+        CurrentViewDate = CurrentViewDate.AddDays(-1);
+        await LoadAppointmentsAsync();
+    }
+
+    [RelayCommand]
+    private async Task GoToNextDayAsync()
+    {
+        CurrentViewDate = CurrentViewDate.AddDays(1);
+        await LoadAppointmentsAsync();
+    }
+
+    [RelayCommand]
+    private async Task GoToTodayAsync()
+    {
+        CurrentViewDate = DateTime.Today;
+        await LoadAppointmentsAsync();
+    }
+
+    [RelayCommand]
+    private async Task SetDaysToShowAsync(string days)
+    {
+        if (int.TryParse(days, out int daysValue))
+        {
+            DaysToShow = daysValue;
+            await LoadAppointmentsAsync();
+        }
+    }
+
+    [RelayCommand]
+    private void SelectColor(string color)
+    {
+        NewAppointmentColor = color;
+    }
+
+    [RelayCommand]
     private async Task AddAppointmentAsync()
     {
         if (string.IsNullOrWhiteSpace(NewAppointmentText))
@@ -72,13 +147,20 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        // Combine date and time
+        DateTime? scheduledDateTime = null;
+        if (NewAppointmentScheduledDate.HasValue)
+        {
+            scheduledDateTime = NewAppointmentScheduledDate.Value.Date + NewAppointmentScheduledTime;
+        }
+
         var appointment = new Appointment
         {
             Text = NewAppointmentText,
             Category = string.IsNullOrWhiteSpace(NewAppointmentCategory) ? "Standard" : NewAppointmentCategory,
             Color = NewAppointmentColor,
             Priority = 0,
-            ScheduledDate = NewAppointmentScheduledDate,
+            ScheduledDate = scheduledDateTime,
             Duration = string.IsNullOrWhiteSpace(NewAppointmentDuration) ? null : NewAppointmentDuration,
             IsOutOfHome = NewAppointmentIsOutOfHome
         };
@@ -89,7 +171,8 @@ public partial class MainViewModel : ObservableObject
             NewAppointmentText = string.Empty;
             NewAppointmentCategory = string.Empty;
             NewAppointmentColor = "#808080";
-            NewAppointmentScheduledDate = null;
+            NewAppointmentScheduledDate = DateTime.Today;
+            NewAppointmentScheduledTime = new TimeSpan(9, 0, 0);
             NewAppointmentDuration = string.Empty;
             NewAppointmentIsOutOfHome = false;
             await LoadAppointmentsAsync();

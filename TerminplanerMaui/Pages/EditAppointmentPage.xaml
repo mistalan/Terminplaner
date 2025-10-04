@@ -6,60 +6,93 @@
              x:DataType="vm:EditAppointmentViewModel"
              Title="Termin bearbeiten">
 
-    <VerticalStackLayout Padding="20" Spacing="15">
-        
-        <Label Text="Termin bearbeiten"
-               FontSize="24"
-               FontAttributes="Bold"
-               Margin="0,0,0,20"/>
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            
+            <Label Text="Termin bearbeiten"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   Margin="0,0,0,20"/>
 
-        <Entry Placeholder="Termin"
-               Text="{Binding EditText}"/>
+            <Entry Placeholder="Termin"
+                   Text="{Binding EditText}"/>
 
-        <Entry Placeholder="Kategorie"
-               Text="{Binding EditCategory}"/>
+            <Entry Placeholder="Kategorie"
+                   Text="{Binding EditCategory}"/>
 
-        <HorizontalStackLayout Spacing="10">
-            <Label Text="Farbe:"
-                   VerticalOptions="Center"/>
-            <Entry Text="{Binding EditColor}"
-                   Placeholder="#808080"
-                   WidthRequest="100"
-                   HorizontalOptions="Start"/>
-            <BoxView Color="{Binding EditColor}"
-                     WidthRequest="40"
-                     HeightRequest="40"
-                     CornerRadius="5"/>
-        </HorizontalStackLayout>
+            <!-- Color Picker -->
+            <Label Text="Farbe:" FontSize="14" FontAttributes="Bold"/>
+            <FlexLayout Wrap="Wrap" JustifyContent="Start" AlignItems="Center">
+                <CollectionView ItemsSource="{Binding AvailableColors}"
+                                SelectionMode="Single"
+                                SelectedItem="{Binding EditColor}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="5"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="0" 
+                                   WidthRequest="50" 
+                                   HeightRequest="50" 
+                                   CornerRadius="25"
+                                   HasShadow="True">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EditAppointmentViewModel}}, Path=SelectColorCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Frame.GestureRecognizers>
+                                <Frame.Triggers>
+                                    <DataTrigger TargetType="Frame" 
+                                                 Binding="{Binding Source={RelativeSource AncestorType={x:Type vm:EditAppointmentViewModel}}, Path=EditColor}" 
+                                                 Value="{Binding .}">
+                                        <Setter Property="BorderColor" Value="Black"/>
+                                        <Setter Property="Padding" Value="3"/>
+                                    </DataTrigger>
+                                </Frame.Triggers>
+                                <BoxView Color="{Binding .}" CornerRadius="25"/>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </FlexLayout>
 
-        <DatePicker Date="{Binding EditScheduledDate}"
-                    Format="D"
-                    MinimumDate="01/01/2020"
-                    MaximumDate="12/31/2030"/>
+            <!-- Date and Time Pickers -->
+            <Label Text="Datum und Uhrzeit:" FontSize="14" FontAttributes="Bold"/>
+            <HorizontalStackLayout Spacing="10">
+                <DatePicker Date="{Binding EditScheduledDate}"
+                            Format="dd.MM.yyyy"
+                            MinimumDate="01/01/2020"
+                            MaximumDate="12/31/2030"
+                            HorizontalOptions="FillAndExpand"/>
+                <TimePicker Time="{Binding EditScheduledTime}"
+                            Format="HH:mm"
+                            HorizontalOptions="FillAndExpand"/>
+            </HorizontalStackLayout>
 
-        <Entry Placeholder="Dauer (z.B. 30 min, 1-2 Std)"
-               Text="{Binding EditDuration}"/>
+            <Entry Placeholder="Dauer (z.B. 30 min, 1-2 Std)"
+                   Text="{Binding EditDuration}"/>
 
-        <HorizontalStackLayout Spacing="10">
-            <CheckBox IsChecked="{Binding EditIsOutOfHome}"/>
-            <Label Text="Außer Haus / Unterwegs"
-                   VerticalOptions="Center"/>
-        </HorizontalStackLayout>
+            <HorizontalStackLayout Spacing="10">
+                <CheckBox IsChecked="{Binding EditIsOutOfHome}"/>
+                <Label Text="Außer Haus / Unterwegs"
+                       VerticalOptions="Center"/>
+            </HorizontalStackLayout>
 
-        <Button Text="💾 Speichern"
-                Command="{Binding SaveCommand}"
-                BackgroundColor="#4caf50"
-                TextColor="White"
-                CornerRadius="8"
-                Padding="15,10"
-                Margin="0,20,0,0"/>
+            <Button Text="💾 Speichern"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="#4caf50"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Padding="15,10"
+                    Margin="0,20,0,0"/>
 
-        <Button Text="❌ Abbrechen"
-                Command="{Binding CancelCommand}"
-                BackgroundColor="#e0e0e0"
-                TextColor="Black"
-                CornerRadius="8"
-                Padding="15,10"/>
+            <Button Text="❌ Abbrechen"
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="#e0e0e0"
+                    TextColor="Black"
+                    CornerRadius="8"
+                    Padding="15,10"/>
 
-    </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
