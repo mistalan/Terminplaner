@@ -1,51 +1,161 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:TerminplanerMaui.ViewModels"
-             x:Class="TerminplanerMaui.Pages.EditAppointmentPage"
-             x:DataType="vm:EditAppointmentViewModel"
-             Title="Termin bearbeiten">
+<ContentPage
+    x:Class="TerminplanerMaui.Pages.EditAppointmentPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:TerminplanerMaui.ViewModels"
+    x:Name="EditAppointmentPageRoot"
+    Title="Termin bearbeiten"
+    x:DataType="vm:EditAppointmentViewModel">
 
-    <VerticalStackLayout Padding="20" Spacing="15">
-        
-        <Label Text="Termin bearbeiten"
-               FontSize="24"
-               FontAttributes="Bold"
-               Margin="0,0,0,20"/>
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
 
-        <Entry Placeholder="Termin"
-               Text="{Binding EditText}"/>
+            <Label
+                Margin="0,0,0,20"
+                FontAttributes="Bold"
+                FontSize="24"
+                Text="Termin bearbeiten" />
 
-        <Entry Placeholder="Kategorie"
-               Text="{Binding EditCategory}"/>
+            <Entry Placeholder="Termin" Text="{Binding EditText}" />
+            <Entry Placeholder="Kategorie" Text="{Binding EditCategory}" />
 
-        <HorizontalStackLayout Spacing="10">
-            <Label Text="Farbe:"
-                   VerticalOptions="Center"/>
-            <Entry Text="{Binding EditColor}"
-                   Placeholder="#808080"
-                   WidthRequest="100"
-                   HorizontalOptions="Start"/>
-            <BoxView Color="{Binding EditColor}"
-                     WidthRequest="40"
-                     HeightRequest="40"
-                     CornerRadius="5"/>
-        </HorizontalStackLayout>
+            <!--  Color Picker  -->
+            <Label
+                FontAttributes="Bold"
+                FontSize="14"
+                Text="Farbe:"
+                TextColor="#212121" />
+            <ScrollView HorizontalScrollBarVisibility="Never" Orientation="Horizontal">
+                <HorizontalStackLayout Padding="4" Spacing="8">
+                    <CollectionView
+                        ItemsSource="{Binding AvailableColors}"
+                        SelectedItem="{Binding EditColor}"
+                        SelectionMode="Single">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout ItemSpacing="8" Orientation="Horizontal" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Border
+                                    Padding="2"
+                                    BackgroundColor="White"
+                                    HeightRequest="50"
+                                    Stroke="LightGray"
+                                    StrokeShape="RoundRectangle 25"
+                                    StrokeThickness="1"
+                                    WidthRequest="50">
+                                    <BoxView
+                                        CornerRadius="20"
+                                        HeightRequest="42"
+                                        WidthRequest="42"
+                                        Color="{Binding .}" />
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup Name="CommonStates">
+                                            <VisualState Name="Normal" />
+                                            <VisualState Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="Stroke" Value="Black" />
+                                                    <Setter Property="Padding" Value="4" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </HorizontalStackLayout>
+            </ScrollView>
 
-        <Button Text="💾 Speichern"
-                Command="{Binding SaveCommand}"
-                BackgroundColor="#4caf50"
-                TextColor="White"
-                CornerRadius="8"
+            <!--  Date and Time Selection  -->
+            <Label
+                FontAttributes="Bold"
+                FontSize="14"
+                Text="Datum und Uhrzeit:"
+                TextColor="#212121" />
+            <Border
+                Padding="12"
+                BackgroundColor="White"
+                Stroke="#667eea"
+                StrokeShape="RoundRectangle 8"
+                StrokeThickness="1">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label
+                            Grid.Column="0"
+                            FontSize="16"
+                            Text="{Binding FormattedScheduledDateTime}"
+                            TextColor="#212121"
+                            VerticalOptions="Center" />
+                        <Button
+                            Grid.Column="1"
+                            Padding="12,6"
+                            BackgroundColor="#667eea"
+                            Command="{Binding ShowDateTimePickerCommand}"
+                            CornerRadius="5"
+                            FontSize="14"
+                            Text="Ändern"
+                            TextColor="White"
+                            VerticalOptions="Center" />
+                    </Grid>
+
+                    <VerticalStackLayout IsVisible="{Binding IsDateTimePickerVisible}" Spacing="10">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <DatePicker
+                                Grid.Column="0"
+                                BackgroundColor="White"
+                                Date="{Binding EditScheduledDate}"
+                                Format="dd.MM.yyyy"
+                                MaximumDate="12/31/2030"
+                                MinimumDate="01/01/2020"
+                                TextColor="Black"
+                                VerticalOptions="Center" />
+                            <TimePicker
+                                Grid.Column="1"
+                                BackgroundColor="White"
+                                Format="HH:mm"
+                                TextColor="Black"
+                                Time="{Binding EditScheduledTime}"
+                                VerticalOptions="Center" />
+                        </Grid>
+                        <Button
+                            Padding="12,8"
+                            BackgroundColor="#4caf50"
+                            Command="{Binding HideDateTimePickerCommand}"
+                            CornerRadius="5"
+                            HorizontalOptions="Center"
+                            Text="OK"
+                            TextColor="White"
+                            WidthRequest="100" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <Entry Placeholder="Dauer (z.B. 30 min, 1-2 Std)" Text="{Binding EditDuration}" />
+
+            <HorizontalStackLayout Spacing="10">
+                <CheckBox IsChecked="{Binding EditIsOutOfHome}" />
+                <Label Text="Außer Haus / Unterwegs" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <Button
+                Margin="0,20,0,0"
                 Padding="15,10"
-                Margin="0,20,0,0"/>
-
-        <Button Text="❌ Abbrechen"
-                Command="{Binding CancelCommand}"
-                BackgroundColor="#e0e0e0"
-                TextColor="Black"
+                BackgroundColor="#4caf50"
+                Command="{Binding SaveCommand}"
                 CornerRadius="8"
-                Padding="15,10"/>
+                Text="💾 Speichern"
+                TextColor="White" />
 
-    </VerticalStackLayout>
+            <Button
+                Padding="15,10"
+                BackgroundColor="#e0e0e0"
+                Command="{Binding CancelCommand}"
+                CornerRadius="8"
+                Text="❌ Abbrechen"
+                TextColor="Black" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

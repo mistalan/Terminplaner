@@ -4,10 +4,10 @@ namespace TerminplanerMaui.Pages;
 
 public partial class MainPage : ContentPage
 {
-    public MainPage(MainViewModel viewModel)
+    public MainPage(MainViewModel vm)
     {
         InitializeComponent();
-        BindingContext = viewModel;
+        BindingContext = vm;
     }
 
     protected override async void OnAppearing()
