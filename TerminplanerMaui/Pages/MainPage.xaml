@@ -126,7 +126,7 @@
                             <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="x:String">
                                 <Border Padding="2" 
                                         WidthRequest="50" 
                                         HeightRequest="50" 
