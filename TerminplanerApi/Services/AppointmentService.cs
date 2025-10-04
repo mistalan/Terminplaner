@@ -9,10 +9,38 @@ public class AppointmentService
 
     public AppointmentService()
     {
-        // Add some sample data
-        _appointments.Add(new Appointment { Id = _nextId++, Text = "Zahnarzttermin", Category = "Gesundheit", Color = "#FF0000", Priority = 1 });
-        _appointments.Add(new Appointment { Id = _nextId++, Text = "Projekt abschließen", Category = "Arbeit", Color = "#0000FF", Priority = 2 });
-        _appointments.Add(new Appointment { Id = _nextId++, Text = "Einkaufen gehen", Category = "Privat", Color = "#00FF00", Priority = 3 });
+        // Add some sample data matching legacy scheduler
+        _appointments.Add(new Appointment
+        {
+            Id = _nextId++,
+            Text = "Zahnarzttermin",
+            Category = "Gesundheit",
+            Color = "#FF0000",
+            Priority = 1,
+            ScheduledDate = DateTime.Today.AddHours(10),
+            Duration = "1 Std"
+        });
+        _appointments.Add(new Appointment
+        {
+            Id = _nextId++,
+            Text = "Projekt abschließen",
+            Category = "Arbeit",
+            Color = "#0000FF",
+            Priority = 2,
+            ScheduledDate = DateTime.Today.AddHours(14),
+            Duration = "2-3 Std"
+        });
+        _appointments.Add(new Appointment
+        {
+            Id = _nextId++,
+            Text = "Lebensmittel einkaufen",
+            Category = "Privat",
+            Color = "#00FF00",
+            Priority = 3,
+            ScheduledDate = DateTime.Today.AddHours(16),
+            Duration = "30 min",
+            IsOutOfHome = true
+        });
     }
 
     public List<Appointment> GetAll() => _appointments.OrderBy(a => a.Priority).ToList();
@@ -43,6 +71,9 @@ public class AppointmentService
         appointment.Category = updatedAppointment.Category;
         appointment.Color = updatedAppointment.Color;
         appointment.Priority = updatedAppointment.Priority;
+        appointment.ScheduledDate = updatedAppointment.ScheduledDate;
+        appointment.Duration = updatedAppointment.Duration;
+        appointment.IsOutOfHome = updatedAppointment.IsOutOfHome;
 
         return appointment;
     }

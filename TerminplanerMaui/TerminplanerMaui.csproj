@@ -19,6 +19,9 @@
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- Enable compiled bindings with Source (for RelativeSource bindings) -->
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
     <!-- Display name -->
     <ApplicationTitle>Terminplaner</ApplicationTitle>

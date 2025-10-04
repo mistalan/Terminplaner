@@ -8,4 +8,7 @@ public class Appointment
     public string Color { get; set; } = "#808080";
     public int Priority { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? ScheduledDate { get; set; }
+    public string? Duration { get; set; }
+    public bool IsOutOfHome { get; set; }
 }
