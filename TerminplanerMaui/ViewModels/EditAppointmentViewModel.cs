@@ -34,6 +34,9 @@ public partial class EditAppointmentViewModel : ObservableObject
     [ObservableProperty]
     private bool editIsOutOfHome;
 
+    [ObservableProperty]
+    private bool isDateTimePickerVisible = false;
+
     // Predefined colors for color picker
     public List<string> AvailableColors { get; } = new()
     {
@@ -42,9 +45,33 @@ public partial class EditAppointmentViewModel : ObservableObject
         "#808080", "#A9A9A9", "#000000", "#FFFFFF"
     };
 
+    public string FormattedScheduledDateTime
+    {
+        get
+        {
+            if (EditScheduledDate.HasValue)
+            {
+                var date = EditScheduledDate.Value;
+                var dateTime = date.Date + EditScheduledTime;
+                return $"{dateTime:dddd, d.M.yyyy} - {dateTime:HH:mm} Uhr";
+            }
+            return "Kein Datum ausgewählt";
+        }
+    }
+
     public EditAppointmentViewModel(AppointmentApiService apiService)
     {
         _apiService = apiService;
+    }
+
+    partial void OnEditScheduledDateChanged(DateTime? value)
+    {
+        OnPropertyChanged(nameof(FormattedScheduledDateTime));
+    }
+
+    partial void OnEditScheduledTimeChanged(TimeSpan value)
+    {
+        OnPropertyChanged(nameof(FormattedScheduledDateTime));
     }
 
     partial void OnAppointmentChanged(Appointment? value)
@@ -75,6 +102,19 @@ public partial class EditAppointmentViewModel : ObservableObject
     private void SelectColor(string color)
     {
         EditColor = color;
+    }
+
+    [RelayCommand]
+    private void ShowDateTimePicker()
+    {
+        IsDateTimePickerVisible = true;
+    }
+
+    [RelayCommand]
+    private void HideDateTimePicker()
+    {
+        IsDateTimePickerVisible = false;
+        OnPropertyChanged(nameof(FormattedScheduledDateTime));
     }
 
     [RelayCommand]

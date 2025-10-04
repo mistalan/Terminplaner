@@ -46,7 +46,24 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private int daysToShow = 3;
 
+    [ObservableProperty]
+    private bool isDateTimePickerVisible = false;
+
     public string CurrentDateDisplay => $"{CurrentViewDate:dddd, d. MMMM yyyy} - {CurrentViewDate.AddDays(DaysToShow - 1):dddd, d. MMMM yyyy}";
+
+    public string FormattedScheduledDateTime
+    {
+        get
+        {
+            if (NewAppointmentScheduledDate.HasValue)
+            {
+                var date = NewAppointmentScheduledDate.Value;
+                var dateTime = date.Date + NewAppointmentScheduledTime;
+                return $"{dateTime:dddd, d.M.yyyy} - {dateTime:HH:mm} Uhr";
+            }
+            return "Kein Datum ausgewählt";
+        }
+    }
 
     // Predefined colors for color picker
     public List<string> AvailableColors { get; } = new()
@@ -69,6 +86,29 @@ public partial class MainViewModel : ObservableObject
     partial void OnDaysToShowChanged(int value)
     {
         OnPropertyChanged(nameof(CurrentDateDisplay));
+    }
+
+    partial void OnNewAppointmentScheduledDateChanged(DateTime? value)
+    {
+        OnPropertyChanged(nameof(FormattedScheduledDateTime));
+    }
+
+    partial void OnNewAppointmentScheduledTimeChanged(TimeSpan value)
+    {
+        OnPropertyChanged(nameof(FormattedScheduledDateTime));
+    }
+
+    [RelayCommand]
+    private void ShowDateTimePicker()
+    {
+        IsDateTimePickerVisible = true;
+    }
+
+    [RelayCommand]
+    private void HideDateTimePicker()
+    {
+        IsDateTimePickerVisible = false;
+        OnPropertyChanged(nameof(FormattedScheduledDateTime));
     }
 
     [RelayCommand]

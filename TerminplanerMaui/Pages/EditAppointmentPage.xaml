@@ -56,18 +56,56 @@
                 </CollectionView>
             </FlexLayout>
 
-            <!-- Date and Time Pickers -->
-            <Label Text="Datum und Uhrzeit:" FontSize="14" FontAttributes="Bold"/>
-            <HorizontalStackLayout Spacing="10">
-                <DatePicker Date="{Binding EditScheduledDate}"
-                            Format="dd.MM.yyyy"
-                            MinimumDate="01/01/2020"
-                            MaximumDate="12/31/2030"
-                            HorizontalOptions="FillAndExpand"/>
-                <TimePicker Time="{Binding EditScheduledTime}"
-                            Format="HH:mm"
-                            HorizontalOptions="FillAndExpand"/>
-            </HorizontalStackLayout>
+            <!-- Date and Time Selection -->
+            <Label Text="Datum und Uhrzeit:" FontSize="14" FontAttributes="Bold" TextColor="#212121"/>
+            <Frame BorderColor="#667eea"
+                   BackgroundColor="White"
+                   CornerRadius="8"
+                   Padding="12"
+                   HasShadow="False">
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8">
+                    <!-- Date/Time Display -->
+                    <Label Grid.Row="0" Grid.Column="0"
+                           Text="{Binding FormattedScheduledDateTime}"
+                           FontSize="16"
+                           TextColor="#212121"
+                           VerticalOptions="Center"/>
+                    
+                    <!-- Change Button -->
+                    <Button Grid.Row="0" Grid.Column="1"
+                            Text="Ändern"
+                            Command="{Binding ShowDateTimePickerCommand}"
+                            BackgroundColor="#667eea"
+                            TextColor="White"
+                            CornerRadius="5"
+                            Padding="12,6"
+                            FontSize="14"/>
+                    
+                    <!-- Hidden Pickers (only visible when editing) -->
+                    <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                                          Spacing="10"
+                                          IsVisible="{Binding IsDateTimePickerVisible}">
+                        <DatePicker Date="{Binding EditScheduledDate}"
+                                    Format="dd.MM.yyyy"
+                                    MinimumDate="01/01/2020"
+                                    MaximumDate="12/31/2030"
+                                    HorizontalOptions="FillAndExpand"
+                                    BackgroundColor="White"
+                                    TextColor="Black"/>
+                        <TimePicker Time="{Binding EditScheduledTime}"
+                                    Format="HH:mm"
+                                    HorizontalOptions="FillAndExpand"
+                                    BackgroundColor="White"
+                                    TextColor="Black"/>
+                        <Button Text="OK"
+                                Command="{Binding HideDateTimePickerCommand}"
+                                BackgroundColor="#4caf50"
+                                TextColor="White"
+                                CornerRadius="5"
+                                Padding="12,6"/>
+                    </HorizontalStackLayout>
+                </Grid>
+            </Frame>
 
             <Entry Placeholder="Dauer (z.B. 30 min, 1-2 Std)"
                    Text="{Binding EditDuration}"/>
