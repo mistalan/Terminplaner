@@ -2,6 +2,8 @@
 # Builds and publishes the MAUI Windows desktop app (MSIX)
 
 name: Deploy Windows App
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:

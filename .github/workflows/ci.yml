@@ -2,6 +2,8 @@
 # Runs on every push and pull request to validate builds and tests
 
 name: CI - Build and Test
+permissions:
+  contents: read
 
 on:
   push:
