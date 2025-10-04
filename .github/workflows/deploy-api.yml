@@ -2,6 +2,8 @@
 # Builds and publishes the ASP.NET Core API for deployment
 
 name: Deploy API
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
