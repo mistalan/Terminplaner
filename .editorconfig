@@ -1,0 +1,42 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# Code files
+[*.{cs,csx,vb,vbx}]
+indent_size = 4
+
+# XAML files
+[*.xaml]
+indent_size = 4
+
+# XML project files
+[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+
+# .NET MAUI specific suppressions
+[*.xaml]
+# XC0045: Suppress "Binding: Property not found" warnings for RelativeSource bindings
+# These are false positives when using RelativeSource to bind to ancestor ViewModels
+# while the DataTemplate has a different x:DataType
+dotnet_diagnostic.XC0045.severity = none
