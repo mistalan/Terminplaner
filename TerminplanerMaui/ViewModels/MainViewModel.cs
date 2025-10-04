@@ -23,10 +23,21 @@ public partial class MainViewModel : ObservableObject
     private string newAppointmentColor = "#808080";
 
     [ObservableProperty]
+    private DateTime? newAppointmentScheduledDate;
+
+    [ObservableProperty]
+    private string newAppointmentDuration = string.Empty;
+
+    [ObservableProperty]
+    private bool newAppointmentIsOutOfHome;
+
+    [ObservableProperty]
     private bool isRefreshing;
 
     [ObservableProperty]
     private Appointment? selectedAppointment;
+
+    public string CurrentDateDisplay => DateTime.Today.ToString("dddd, d. MMMM yyyy");
 
     public MainViewModel(AppointmentApiService apiService)
     {
@@ -66,7 +77,10 @@ public partial class MainViewModel : ObservableObject
             Text = NewAppointmentText,
             Category = string.IsNullOrWhiteSpace(NewAppointmentCategory) ? "Standard" : NewAppointmentCategory,
             Color = NewAppointmentColor,
-            Priority = 0
+            Priority = 0,
+            ScheduledDate = NewAppointmentScheduledDate,
+            Duration = string.IsNullOrWhiteSpace(NewAppointmentDuration) ? null : NewAppointmentDuration,
+            IsOutOfHome = NewAppointmentIsOutOfHome
         };
 
         var created = await _apiService.CreateAppointmentAsync(appointment);
@@ -75,6 +89,9 @@ public partial class MainViewModel : ObservableObject
             NewAppointmentText = string.Empty;
             NewAppointmentCategory = string.Empty;
             NewAppointmentColor = "#808080";
+            NewAppointmentScheduledDate = null;
+            NewAppointmentDuration = string.Empty;
+            NewAppointmentIsOutOfHome = false;
             await LoadAppointmentsAsync();
         }
         else

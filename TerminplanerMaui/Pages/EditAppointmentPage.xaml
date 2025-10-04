@@ -32,6 +32,20 @@
                      CornerRadius="5"/>
         </HorizontalStackLayout>
 
+        <DatePicker Date="{Binding EditScheduledDate}"
+                    Format="D"
+                    MinimumDate="01/01/2020"
+                    MaximumDate="12/31/2030"/>
+
+        <Entry Placeholder="Dauer (z.B. 30 min, 1-2 Std)"
+               Text="{Binding EditDuration}"/>
+
+        <HorizontalStackLayout Spacing="10">
+            <CheckBox IsChecked="{Binding EditIsOutOfHome}"/>
+            <Label Text="Außer Haus / Unterwegs"
+                   VerticalOptions="Center"/>
+        </HorizontalStackLayout>
+
         <Button Text="💾 Speichern"
                 Command="{Binding SaveCommand}"
                 BackgroundColor="#4caf50"

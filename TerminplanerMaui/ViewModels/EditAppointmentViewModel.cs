@@ -22,6 +22,15 @@ public partial class EditAppointmentViewModel : ObservableObject
     [ObservableProperty]
     private string editColor = "#808080";
 
+    [ObservableProperty]
+    private DateTime? editScheduledDate;
+
+    [ObservableProperty]
+    private string editDuration = string.Empty;
+
+    [ObservableProperty]
+    private bool editIsOutOfHome;
+
     public EditAppointmentViewModel(AppointmentApiService apiService)
     {
         _apiService = apiService;
@@ -34,6 +43,9 @@ public partial class EditAppointmentViewModel : ObservableObject
             EditText = value.Text;
             EditCategory = value.Category;
             EditColor = value.Color;
+            EditScheduledDate = value.ScheduledDate;
+            EditDuration = value.Duration ?? string.Empty;
+            EditIsOutOfHome = value.IsOutOfHome;
         }
     }
 
@@ -55,7 +67,10 @@ public partial class EditAppointmentViewModel : ObservableObject
             Category = string.IsNullOrWhiteSpace(EditCategory) ? "Standard" : EditCategory,
             Color = EditColor,
             Priority = Appointment.Priority,
-            CreatedAt = Appointment.CreatedAt
+            CreatedAt = Appointment.CreatedAt,
+            ScheduledDate = EditScheduledDate,
+            Duration = string.IsNullOrWhiteSpace(EditDuration) ? null : EditDuration,
+            IsOutOfHome = EditIsOutOfHome
         };
 
         var result = await _apiService.UpdateAppointmentAsync(Appointment.Id, updatedAppointment);

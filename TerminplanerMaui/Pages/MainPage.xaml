@@ -3,23 +3,31 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:TerminplanerMaui.ViewModels"
              xmlns:models="clr-namespace:TerminplanerMaui.Models"
+             xmlns:converters="clr-namespace:TerminplanerMaui.Converters"
              x:Class="TerminplanerMaui.Pages.MainPage"
              x:DataType="vm:MainViewModel"
              Title="Terminplaner">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <Grid RowDefinitions="Auto,Auto,*" Padding="20">
         
-        <!-- Header -->
-        <VerticalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,20">
-            <Label Text="📅 Terminplaner"
-                   FontSize="32"
+        <!-- Current Date Display -->
+        <Frame Grid.Row="0" 
+               BackgroundColor="#667eea"
+               Padding="15"
+               Margin="0,0,0,10"
+               CornerRadius="8">
+            <Label Text="{Binding CurrentDateDisplay}"
+                   FontSize="20"
                    FontAttributes="Bold"
+                   TextColor="White"
                    HorizontalOptions="Center"/>
-            <Label Text="Termine einfach verwalten - wie in Word, nur besser!"
-                   FontSize="14"
-                   HorizontalOptions="Center"
-                   TextColor="Gray"/>
-        </VerticalStackLayout>
+        </Frame>
 
         <!-- Add Appointment Section -->
         <VerticalStackLayout Grid.Row="1" Spacing="10" Margin="0,0,0,20">
@@ -43,6 +51,20 @@
                          CornerRadius="5"/>
             </HorizontalStackLayout>
 
+            <DatePicker Date="{Binding NewAppointmentScheduledDate}"
+                        Format="D"
+                        MinimumDate="01/01/2020"
+                        MaximumDate="12/31/2030"/>
+
+            <Entry Placeholder="Dauer (z.B. 30 min, 1-2 Std)"
+                   Text="{Binding NewAppointmentDuration}"/>
+
+            <HorizontalStackLayout Spacing="10">
+                <CheckBox IsChecked="{Binding NewAppointmentIsOutOfHome}"/>
+                <Label Text="Außer Haus / Unterwegs"
+                       VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+
             <Button Text="➕ Hinzufügen"
                     Command="{Binding AddAppointmentCommand}"
                     BackgroundColor="#667eea"
@@ -61,7 +83,7 @@
                         <FormattedString>
                             <Span Text="💡 " FontAttributes="Bold"/>
                             <Span Text="Tipp: " FontAttributes="Bold"/>
-                            <Span Text="Nutze die Pfeil-Buttons, um die Priorität zu ändern. Termine oben haben höchste Priorität!"/>
+                            <Span Text="Nutze die Pfeil-Buttons, um die Priorität zu ändern. Grüner Hintergrund = Außer Haus!"/>
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
@@ -97,8 +119,15 @@
                         <Frame Margin="0,5"
                                Padding="15"
                                CornerRadius="10"
-                               BorderColor="#e0e0e0"
-                               BackgroundColor="White">
+                               BorderColor="#e0e0e0">
+                            <Frame.Triggers>
+                                <DataTrigger TargetType="Frame" Binding="{Binding IsOutOfHome}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="#C8E6C9"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Frame" Binding="{Binding IsOutOfHome}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="White"/>
+                                </DataTrigger>
+                            </Frame.Triggers>
                             <Grid ColumnDefinitions="10,*,Auto" ColumnSpacing="15">
                                 
                                 <!-- Color Indicator -->
@@ -115,9 +144,19 @@
                                     <Label Text="{Binding Category, StringFormat='🏷️ {0}'}"
                                           FontSize="14"
                                           TextColor="Gray"/>
-                                    <Label Text="{Binding Priority, StringFormat='Priorität: {0}'}"
-                                          FontSize="12"
-                                          TextColor="LightGray"/>
+                                    <Label Text="{Binding ScheduledDate, StringFormat='🕒 {0:HH:mm} Uhr'}"
+                                          FontSize="14"
+                                          TextColor="Gray"
+                                          IsVisible="{Binding ScheduledDate, Converter={StaticResource IsNotNullConverter}}"/>
+                                    <Label Text="{Binding Duration, StringFormat='⏱️ {0}'}"
+                                          FontSize="14"
+                                          TextColor="Gray"
+                                          IsVisible="{Binding Duration, Converter={StaticResource IsNotNullConverter}}"/>
+                                    <Label Text="📍 Außer Haus"
+                                          FontSize="14"
+                                          FontAttributes="Bold"
+                                          TextColor="Green"
+                                          IsVisible="{Binding IsOutOfHome}"/>
                                 </VerticalStackLayout>
 
                                 <!-- Action Buttons -->

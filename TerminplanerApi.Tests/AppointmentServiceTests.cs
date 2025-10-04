@@ -63,7 +63,7 @@ public class AppointmentServiceTests
         Assert.Equal(3, appointments.Count);
         Assert.Contains(appointments, a => a.Text == "Zahnarzttermin");
         Assert.Contains(appointments, a => a.Text == "Projekt abschließen");
-        Assert.Contains(appointments, a => a.Text == "Einkaufen gehen");
+        Assert.Contains(appointments, a => a.Text == "Lebensmittel einkaufen");
     }
 
     #endregion
