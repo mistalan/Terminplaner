@@ -19,11 +19,12 @@
         <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="20">
         
         <!-- Date Navigation -->
-        <Frame Grid.Row="0" 
-               BackgroundColor="#667eea"
-               Padding="15"
-               Margin="0,0,0,10"
-               CornerRadius="8">
+        <Border Grid.Row="0" 
+                BackgroundColor="#667eea"
+                Padding="15"
+                Margin="0,0,0,10"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 8">
             <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                 <!-- Previous Day Button -->
                 <Button Grid.Column="0"
@@ -68,7 +69,7 @@
                         CornerRadius="5"
                         Padding="0"/>
             </Grid>
-        </Frame>
+        </Border>
 
         <!-- View Options -->
         <HorizontalStackLayout Grid.Row="1" Spacing="10" Margin="0,0,0,10" HorizontalOptions="Center">
@@ -125,32 +126,32 @@
                             <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Frame Padding="2" 
-                                       WidthRequest="50" 
-                                       HeightRequest="50" 
-                                       CornerRadius="25"
-                                       BackgroundColor="White"
-                                       BorderColor="LightGray"
-                                       HasShadow="False">
-                                    <Frame.GestureRecognizers>
+                            <DataTemplate x:DataType="x:String">
+                                <Border Padding="2" 
+                                        WidthRequest="50" 
+                                        HeightRequest="50" 
+                                        BackgroundColor="White"
+                                        Stroke="LightGray"
+                                        StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 25">
+                                    <Border.GestureRecognizers>
                                         <TapGestureRecognizer 
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=SelectColorCommand}"
                                             CommandParameter="{Binding .}"/>
-                                    </Frame.GestureRecognizers>
-                                    <Frame.Triggers>
-                                        <DataTrigger TargetType="Frame" 
+                                    </Border.GestureRecognizers>
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" 
                                                      Binding="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=NewAppointmentColor}" 
                                                      Value="{Binding .}">
-                                            <Setter Property="BorderColor" Value="Black"/>
+                                            <Setter Property="Stroke" Value="Black"/>
                                             <Setter Property="Padding" Value="4"/>
                                         </DataTrigger>
-                                    </Frame.Triggers>
+                                    </Border.Triggers>
                                     <BoxView Color="{Binding .}" 
                                              CornerRadius="20"
                                              WidthRequest="42"
                                              HeightRequest="42"/>
-                                </Frame>
+                                </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
@@ -159,11 +160,11 @@
 
             <!-- Date and Time Selection -->
             <Label Text="Datum und Uhrzeit:" FontSize="14" FontAttributes="Bold" TextColor="#212121"/>
-            <Frame BorderColor="#667eea"
-                   BackgroundColor="White"
-                   CornerRadius="8"
-                   Padding="12"
-                   HasShadow="False">
+            <Border Stroke="#667eea"
+                    BackgroundColor="White"
+                    StrokeThickness="1"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="10">
                     <!-- Date/Time Display Row -->
                     <Grid ColumnDefinitions="*,Auto">
@@ -213,7 +214,7 @@
                                 WidthRequest="100"/>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <Entry Placeholder="Dauer (z.B. 30 min, 1-2 Std)"
                    Text="{Binding NewAppointmentDuration}"/>
@@ -232,11 +233,12 @@
                     Padding="15,10"/>
 
             <!-- Info Box -->
-            <Frame BackgroundColor="#e3f2fd"
-                   BorderColor="#667eea"
-                   CornerRadius="8"
-                   Padding="15"
-                   Margin="0,10,0,0">
+            <Border BackgroundColor="#e3f2fd"
+                    Stroke="#667eea"
+                    StrokeThickness="1"
+                    Padding="15"
+                    Margin="0,10,0,0"
+                    StrokeShape="RoundRectangle 8">
                 <Label TextColor="#1565c0">
                     <Label.FormattedText>
                         <FormattedString>
@@ -246,7 +248,7 @@
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
-            </Frame>
+            </Border>
         </VerticalStackLayout>
 
         <!-- Appointments List -->
@@ -275,22 +277,22 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Appointment">
-                        <Frame Margin="0,5"
-                               Padding="15"
-                               CornerRadius="10"
-                               BorderColor="#e0e0e0"
-                               HasShadow="True">
-                            <Frame.Triggers>
-                                <DataTrigger TargetType="Frame" Binding="{Binding IsOutOfHome}" Value="True">
+                        <Border Margin="0,5"
+                                Padding="15"
+                                Stroke="#e0e0e0"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 10"
+                                Shadow="{Shadow Brush=Black, Offset='2,2', Radius=4, Opacity=0.3}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsOutOfHome}" Value="True">
                                     <Setter Property="BackgroundColor" Value="#A5D6A7"/>
-                                    <Setter Property="BorderColor" Value="#4CAF50"/>
+                                    <Setter Property="Stroke" Value="#4CAF50"/>
                                 </DataTrigger>
-                                <DataTrigger TargetType="Frame" Binding="{Binding IsOutOfHome}" Value="False">
+                                <DataTrigger TargetType="Border" Binding="{Binding IsOutOfHome}" Value="False">
                                     <Setter Property="BackgroundColor" Value="White"/>
                                 </DataTrigger>
-                            </Frame.Triggers>
+                            </Border.Triggers>
                             <Grid ColumnDefinitions="10,*,Auto" ColumnSpacing="15">
-                                
                                 <!-- Color Indicator -->
                                 <BoxView Grid.Column="0"
                                         Color="{Binding Color}"
@@ -365,7 +367,7 @@
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
                             </Grid>
-                        </Frame>
+                        </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
