@@ -10,108 +10,55 @@ public partial class EditAppointmentViewModel : ObservableObject
 {
     private readonly AppointmentApiService _apiService;
 
-    [ObservableProperty]
-    private Appointment? appointment;
+    [ObservableProperty] private Appointment? appointment;
+    [ObservableProperty] private string editText = string.Empty;
+    [ObservableProperty] private string editCategory = string.Empty;
+    [ObservableProperty] private string editColor = "#808080";
+    [ObservableProperty] private DateTime? editScheduledDate = DateTime.Today;
+    [ObservableProperty] private TimeSpan editScheduledTime = new TimeSpan(9, 0, 0);
+    [ObservableProperty] private string editDuration = string.Empty;
+    [ObservableProperty] private bool editIsOutOfHome;
+    [ObservableProperty] private bool isDateTimePickerVisible = false;
 
-    [ObservableProperty]
-    private string editText = string.Empty;
-
-    [ObservableProperty]
-    private string editCategory = string.Empty;
-
-    [ObservableProperty]
-    private string editColor = "#808080";
-
-    [ObservableProperty]
-    private DateTime? editScheduledDate = DateTime.Today;
-
-    [ObservableProperty]
-    private TimeSpan editScheduledTime = new TimeSpan(9, 0, 0);
-
-    [ObservableProperty]
-    private string editDuration = string.Empty;
-
-    [ObservableProperty]
-    private bool editIsOutOfHome;
-
-    [ObservableProperty]
-    private bool isDateTimePickerVisible = false;
-
-    // Predefined colors for color picker
     public List<string> AvailableColors { get; } = new()
     {
-        "#FF0000", "#FF6B6B", "#FFA500", "#FFD700", "#00FF00", 
+        "#FF0000", "#FF6B6B", "#FFA500", "#FFD700", "#00FF00",
         "#00CED1", "#0000FF", "#4B0082", "#8B008B", "#FF1493",
         "#808080", "#A9A9A9", "#000000", "#FFFFFF"
     };
 
-    public string FormattedScheduledDateTime
-    {
-        get
-        {
-            if (EditScheduledDate.HasValue)
-            {
-                var date = EditScheduledDate.Value;
-                var dateTime = date.Date + EditScheduledTime;
-                return $"{dateTime:dddd, d.M.yyyy} - {dateTime:HH:mm} Uhr";
-            }
-            return "Kein Datum ausgewählt";
-        }
-    }
+    public string FormattedScheduledDateTime =>
+        EditScheduledDate.HasValue
+            ? $"{(EditScheduledDate.Value.Date + EditScheduledTime):dddd, d.M.yyyy} - {(EditScheduledDate.Value.Date + EditScheduledTime):HH:mm} Uhr"
+            : "Kein Datum ausgewählt";
 
-    public EditAppointmentViewModel(AppointmentApiService apiService)
-    {
-        _apiService = apiService;
-    }
+    public EditAppointmentViewModel(AppointmentApiService apiService) => _apiService = apiService;
 
-    partial void OnEditScheduledDateChanged(DateTime? value)
-    {
-        OnPropertyChanged(nameof(FormattedScheduledDateTime));
-    }
-
-    partial void OnEditScheduledTimeChanged(TimeSpan value)
-    {
-        OnPropertyChanged(nameof(FormattedScheduledDateTime));
-    }
+    partial void OnEditScheduledDateChanged(DateTime? value) => OnPropertyChanged(nameof(FormattedScheduledDateTime));
+    partial void OnEditScheduledTimeChanged(TimeSpan value) => OnPropertyChanged(nameof(FormattedScheduledDateTime));
 
     partial void OnAppointmentChanged(Appointment? value)
     {
-        if (value != null)
+        if (value is null) return;
+        EditText = value.Text;
+        EditCategory = value.Category;
+        EditColor = value.Color;
+        if (value.ScheduledDate.HasValue)
         {
-            EditText = value.Text;
-            EditCategory = value.Category;
-            EditColor = value.Color;
-            
-            if (value.ScheduledDate.HasValue)
-            {
-                EditScheduledDate = value.ScheduledDate.Value.Date;
-                EditScheduledTime = value.ScheduledDate.Value.TimeOfDay;
-            }
-            else
-            {
-                EditScheduledDate = DateTime.Today;
-                EditScheduledTime = new TimeSpan(9, 0, 0);
-            }
-            
-            EditDuration = value.Duration ?? string.Empty;
-            EditIsOutOfHome = value.IsOutOfHome;
+            EditScheduledDate = value.ScheduledDate.Value.Date;
+            EditScheduledTime = value.ScheduledDate.Value.TimeOfDay;
         }
+        else
+        {
+            EditScheduledDate = DateTime.Today;
+            EditScheduledTime = new TimeSpan(9, 0, 0);
+        }
+        EditDuration = value.Duration ?? string.Empty;
+        EditIsOutOfHome = value.IsOutOfHome;
     }
 
-    [RelayCommand]
-    private void SelectColor(string color)
-    {
-        EditColor = color;
-    }
-
-    [RelayCommand]
-    private void ShowDateTimePicker()
-    {
-        IsDateTimePickerVisible = true;
-    }
-
-    [RelayCommand]
-    private void HideDateTimePicker()
+    [RelayCommand] private void ShowDateTimePicker() => IsDateTimePickerVisible = true;
+    [RelayCommand] private void HideDateTimePicker()
     {
         IsDateTimePickerVisible = false;
         OnPropertyChanged(nameof(FormattedScheduledDateTime));
@@ -121,21 +68,17 @@ public partial class EditAppointmentViewModel : ObservableObject
     private async Task SaveAsync()
     {
         if (Appointment == null) return;
-
         if (string.IsNullOrWhiteSpace(EditText))
         {
             await Shell.Current.DisplayAlert("Fehler", "Bitte gib einen Termin ein!", "OK");
             return;
         }
 
-        // Combine date and time
-        DateTime? scheduledDateTime = null;
-        if (EditScheduledDate.HasValue)
-        {
-            scheduledDateTime = EditScheduledDate.Value.Date + EditScheduledTime;
-        }
+        DateTime? scheduledDateTime = EditScheduledDate.HasValue
+            ? EditScheduledDate.Value.Date + EditScheduledTime
+            : null;
 
-        var updatedAppointment = new Appointment
+        var updated = new Appointment
         {
             Id = Appointment.Id,
             Text = EditText,
@@ -148,20 +91,13 @@ public partial class EditAppointmentViewModel : ObservableObject
             IsOutOfHome = EditIsOutOfHome
         };
 
-        var result = await _apiService.UpdateAppointmentAsync(Appointment.Id, updatedAppointment);
+        var result = await _apiService.UpdateAppointmentAsync(Appointment.Id, updated);
         if (result != null)
-        {
             await Shell.Current.GoToAsync("..");
-        }
         else
-        {
             await Shell.Current.DisplayAlert("Fehler", "Termin konnte nicht aktualisiert werden!", "OK");
-        }
     }
 
     [RelayCommand]
-    private async Task CancelAsync()
-    {
-        await Shell.Current.GoToAsync("..");
-    }
+    private async Task CancelAsync() => await Shell.Current.GoToAsync("..");
 }
