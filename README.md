@@ -1,7 +1,6 @@
 # 📅 Terminplaner
 
 [![CI Status](https://github.com/mistalan/Terminplaner/workflows/CI%20-%20Build%20and%20Test/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/mistalan/Terminplaner/workflows/CodeQL%20Security%20Analysis/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/codeql.yml)
 [![Code Coverage](https://github.com/mistalan/Terminplaner/workflows/Code%20Coverage/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/coverage.yml)
 [![Docker](https://github.com/mistalan/Terminplaner/workflows/Docker%20Build%20and%20Push/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/docker.yml)
 [![.NET Version](https://img.shields.io/badge/.NET-9.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/9.0)
@@ -252,7 +251,7 @@ Das Projekt verfügt über automatisierte GitHub Actions Workflows für:
 |----------|---------|--------------|
 | **CI - Build and Test** | Push/PR to main | Baut API, führt alle 42 Tests aus, prüft Code-Formatierung |
 | **Code Coverage** | Push/PR to main | Generiert Coverage-Reports (erfordert optional `CODECOV_TOKEN` Secret) |
-| **CodeQL Security** | Push/PR to main, Weekly | Sicherheitsanalyse für C# Code |
+| **CodeQL Security** | Push/PR to main, Weekly | Sicherheitsanalyse für C# Code (GitHub Default Setup) |
 | **Docker Build** | Push to main, Tags | Baut und pusht Docker Image zu GHCR |
 | **Release Drafter** | Push to main, PRs | Erstellt automatisch Release-Notizen |
 | **Label Sync** | Push to main (labels.yml), Manual | Synchronisiert Repository-Labels |
@@ -266,7 +265,7 @@ Das Projekt verfügt über automatisierte GitHub Actions Workflows für:
 Das Projekt nutzt folgende integrierte GitHub Features:
 
 - ✅ **Dependabot** - Automatische Dependency-Updates für NuGet und GitHub Actions
-- ✅ **CodeQL** - Sicherheitsscan für Schwachstellen und Code-Fehler
+- ✅ **CodeQL** - Sicherheitsscan für Schwachstellen und Code-Fehler (GitHub Default Setup)
 - ✅ **Release Drafter** - Automatische Generierung von Release Notes
 - ✅ **Label Sync** - Automatische Synchronisierung von Repository-Labels
 - ✅ **Code Coverage** - Test Coverage Reporting (Cobertura XML)
