@@ -1,6 +1,7 @@
 # 📅 Terminplaner
 
 [![CI Status](https://github.com/mistalan/Terminplaner/workflows/CI%20-%20Build%20and%20Test/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/badge/CodeQL-enabled-success?logo=github)](https://github.com/mistalan/Terminplaner/security/code-scanning)
 [![Code Coverage](https://github.com/mistalan/Terminplaner/workflows/Code%20Coverage/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/coverage.yml)
 [![Docker](https://github.com/mistalan/Terminplaner/workflows/Docker%20Build%20and%20Push/badge.svg)](https://github.com/mistalan/Terminplaner/actions/workflows/docker.yml)
 [![.NET Version](https://img.shields.io/badge/.NET-9.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/9.0)
