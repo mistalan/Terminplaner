@@ -54,6 +54,10 @@ jobs:
         cd TerminplanerApi
         dotnet build --configuration Release --no-restore
 
+    - name: Build Tests
+      run: |
+        dotnet build TerminplanerApi.Tests/TerminplanerApi.Tests.csproj --configuration Release
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
