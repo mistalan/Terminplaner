@@ -622,6 +622,9 @@ docker run -p 5215:5215 ghcr.io/mistalan/terminplaner/api:latest
 8. **Verify all paths are absolute** when working with files
 9. **Ensure API is running** before starting the MAUI app for testing
 10. **Verify test coverage** - if you add new functionality, add corresponding tests
+11. **Update copilot-instructions.md after making any changes** - to keep this file up-to-date
+12. **Check for any other open issues when working on a pull request** - to avoid concurrent strategies
+13. **Check for the last closed pull request/issue when working on a new pull request** - to avoid reverting working code and/or fix -> unfix circles
 
 ### Never Do:
 1. **Never commit bin/ or obj/ directories** - they're in .gitignore for a reason
