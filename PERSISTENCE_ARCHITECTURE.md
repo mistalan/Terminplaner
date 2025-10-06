@@ -52,12 +52,14 @@ The repository type is configured in `appsettings.json`:
 {
   "RepositoryType": "InMemory",  // or "CosmosDb"
   "CosmosDb": {
-    "ConnectionString": "AccountEndpoint=https://...;AccountKey=...",
+    "ConnectionString": "",  // Set via environment variables or user secrets - NEVER commit actual keys
     "DatabaseId": "db_1",
     "ContainerId": "container_1"
   }
 }
 ```
+
+**⚠️ Security Warning**: The `ConnectionString` should be empty in committed files. Configure it using environment variables or user secrets. See [SECURITY_CONFIGURATION.md](SECURITY_CONFIGURATION.md) for details.
 
 ### Environment-Specific Configuration
 
@@ -133,15 +135,28 @@ else
 - **Container ID**: `container_1`
 - **Partition Key**: `/id`
 
-### Connection String
+### Connection String Security
 
-The connection string is stored in `appsettings.json` (production) and should be stored in Azure Key Vault or environment variables for security in deployed environments.
+**⚠️ CRITICAL SECURITY REQUIREMENT**: The connection string contains sensitive credentials and must NEVER be committed to source control.
 
-**⚠️ Security Note**: Never commit production connection strings to source control. Use user secrets for local development:
+For detailed instructions on how to securely configure the connection string, see [SECURITY_CONFIGURATION.md](SECURITY_CONFIGURATION.md).
 
+**Quick Setup:**
+
+**Local Development (User Secrets):**
 ```bash
-dotnet user-secrets set "CosmosDb:ConnectionString" "AccountEndpoint=...;AccountKey=..."
+cd TerminplanerApi
+dotnet user-secrets set "CosmosDb:ConnectionString" "AccountEndpoint=https://terninplaner.documents.azure.com:443/;AccountKey=YOUR_KEY_HERE"
+dotnet user-secrets set "RepositoryType" "CosmosDb"
 ```
+
+**Production (Environment Variables):**
+```bash
+export CosmosDb__ConnectionString="AccountEndpoint=https://terninplaner.documents.azure.com:443/;AccountKey=YOUR_KEY_HERE"
+export RepositoryType="CosmosDb"
+```
+
+See [SECURITY_CONFIGURATION.md](SECURITY_CONFIGURATION.md) for complete security best practices and configuration options.
 
 ## NuGet Packages
 

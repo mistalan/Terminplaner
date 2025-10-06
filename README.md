@@ -232,6 +232,8 @@ Das Projekt verwendet das **Repository Pattern** mit Abstraktionsschicht für fl
 
 **Detaillierte Dokumentation:** Siehe [PERSISTENCE_ARCHITECTURE.md](PERSISTENCE_ARCHITECTURE.md)
 
+**Sicherheitskonfiguration:** Siehe [SECURITY_CONFIGURATION.md](SECURITY_CONFIGURATION.md) für sichere Konfiguration von Azure Cosmos DB Credentials
+
 **Persistency Evaluation:** Siehe [PERSISTENCY_EVALUATION.md](PERSISTENCY_EVALUATION.md) für eine umfassende Analyse von NoSQL-Datenbanken und Cloud-Services
 
 ## 🔮 Zukünftige Erweiterungen
