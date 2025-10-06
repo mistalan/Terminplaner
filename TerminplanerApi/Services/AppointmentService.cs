@@ -75,6 +75,14 @@ public class AppointmentService
         appointment.Duration = updatedAppointment.Duration;
         appointment.IsOutOfHome = updatedAppointment.IsOutOfHome;
 
+        // This code should test if code coverage tools are working
+        var easter = true;
+        if(easter)
+        {
+            appointment.Text += " 🐰";
+            Console.WriteLine("This code is not tested yet :)");
+        }
+
         return appointment;
     }
 
