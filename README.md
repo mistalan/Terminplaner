@@ -221,7 +221,7 @@ dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage
 
 ## 🔮 Zukünftige Erweiterungen
 
-- 💾 Persistente Datenspeicherung (SQLite/Datenbank)
+- 💾 **Persistente Datenspeicherung** (NoSQL/Cloud-Datenbank) - 📄 Siehe [Persistency Evaluation](PERSISTENCY_EVALUATION.md) für eine umfassende Analyse von NoSQL-Datenbanken und Cloud-Services
 - 🔔 Benachrichtigungen und Erinnerungen
 - 📅 Kalenderintegration
 - 👥 Mehrbenutzer-Unterstützung
@@ -319,6 +319,17 @@ dotnet publish -c Release -o ./publish
 **Benötigte Secrets (alle optional):**
 - `CODECOV_TOKEN` - Für Codecov Coverage-Uploads (nur wenn Codecov App installiert)
 - Signing-Secrets für Android/Windows sind für spätere Store-Veröffentlichung vorbereitet (aktuell nicht benötigt)
+
+## 📚 Dokumentation
+
+Das Projekt enthält umfassende Dokumentation in den folgenden Dateien:
+
+- **[PERSISTENCY_EVALUATION.md](PERSISTENCY_EVALUATION.md)** - Umfassende Evaluation von NoSQL-Datenbanken und Cloud-Services für persistente Datenspeicherung
+- **[USER_GUIDE.md](USER_GUIDE.md)** - Benutzerhandbuch für die Terminplaner-App
+- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Zusammenfassung der Legacy-Scheduler-Feature-Implementierung
+- **[UI_MOCKUP.md](UI_MOCKUP.md)** - UI-Mockups und Design-Spezifikationen
+- **[UI_CHANGES.md](UI_CHANGES.md)** - Dokumentation der UI-Änderungen
+- **[TerminplanerApi.Tests/TEST_CASES.md](TerminplanerApi.Tests/TEST_CASES.md)** - Detaillierte Test-Dokumentation
 
 ## 📝 Lizenz
 
