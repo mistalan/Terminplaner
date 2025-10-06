@@ -109,7 +109,7 @@ cd TerminplanerApi
 dotnet build
 ```
 - Compiles the API project
-- Takes ~10-15 seconds for initial build, ~3-5 seconds for incremental
+- Takes ~12 seconds for initial build, ~3-5 seconds for incremental
 - Output: bin/Debug/net9.0/TerminplanerApi.dll
 
 **Build the MAUI project:**
@@ -147,9 +147,10 @@ dotnet test
 ```
 - Runs all test projects in the solution
 - Currently includes unit tests and integration tests
-- Takes ~3-5 seconds to run all tests
+- Takes ~6 seconds to run all tests
 - **Exit code 0** indicates all tests passed
 - **IMPORTANT**: All tests must pass before committing code changes
+- **NOTE**: If MAUI workloads are not installed, use `dotnet test TerminplanerApi.Tests/TerminplanerApi.Tests.csproj` to run only API tests
 
 **Run tests with detailed output:**
 ```bash
@@ -182,7 +183,7 @@ dotnet test --filter "FullyQualifiedName~AppointmentApiIntegrationTests"
 
 **Test project location:**
 - Tests are in `TerminplanerApi.Tests/` directory
-- Test documentation: See [TEST_CASES.md](../TEST_CASES.md) and [TerminplanerApi.Tests/README.md](../TerminplanerApi.Tests/README.md)
+- Test documentation: See [TEST_CASES.md](TerminplanerApi.Tests/TEST_CASES.md) and [TerminplanerApi.Tests/README.md](TerminplanerApi.Tests/README.md)
 
 **Test coverage:**
 - **Unit Tests (23)**: AppointmentService business logic
@@ -271,16 +272,30 @@ dotnet watch run
 ### Repository Root Files
 ```
 /
+├── .dockerignore       # Docker ignore patterns
+├── .editorconfig       # Editor configuration (code style)
 ├── .gitignore          # Visual Studio/C# gitignore patterns (comprehensive)
-├── README.md           # Project documentation
-├── QUICKSTART.md       # Quick start guide
-├── TEST_CASES.md       # Detailed test case documentation
+├── README.md           # Project documentation (German)
+├── USER_GUIDE.md       # User guide documentation
+├── UI_MOCKUP.md        # UI mockup documentation
+├── UI_CHANGES.md       # UI changes documentation
+├── IMPLEMENTATION_SUMMARY.md  # Implementation summary
+├── LICENSE             # MIT License
 ├── Terminplaner.sln    # Solution file containing all projects
+├── Dockerfile          # Multi-stage Docker build for API
+├── docker-compose.yml  # Docker Compose configuration
 ├── .github/
+│   ├── workflows/      # CI/CD workflows (10 workflow files)
+│   ├── dependabot.yml  # Dependency updates configuration
+│   ├── labels.yml      # GitHub labels configuration
+│   ├── pr-size-labeler.yml  # PR size labeling configuration
+│   ├── release-drafter.yml  # Release notes configuration
+│   ├── LABELS.md       # Labels documentation
 │   └── copilot-instructions.md  # This file
 ├── TerminplanerApi/    # Backend Web API project
 ├── TerminplanerApi.Tests/  # Test project (unit & integration tests)
-└── TerminplanerMaui/   # Frontend MAUI app project
+├── TerminplanerMaui/   # Frontend MAUI app project
+└── assets/             # Project assets
 ```
 
 ### Backend API Project Structure (TerminplanerApi)
@@ -406,11 +421,36 @@ TerminplanerMaui/
 
 ### GitHub Workflows
 
-**Available Workflow:**
-- Copilot SWE Agent workflow (dynamic/copilot-swe-agent/copilot)
-- Automatically triggered by Copilot actions
+**Active CI/CD Workflows:**
 
-**No traditional CI/CD workflows exist yet** on the main branch. If adding CI/CD:
+The repository has comprehensive GitHub Actions workflows:
+
+| Workflow | File | Trigger | Purpose |
+|----------|------|---------|---------|
+| **CI - Build and Test** | ci.yml | Push/PR to main | Builds API, runs all 42 tests, checks code formatting |
+| **Code Coverage** | coverage.yml | Push/PR to main | Generates coverage reports, uploads to Codecov (optional) |
+| **CodeQL Security** | N/A | Push/PR to main, Weekly | Security analysis (GitHub Default Setup) |
+| **Docker Build** | docker.yml | Push to main, Tags | Builds and pushes Docker image to GHCR |
+| **Release Drafter** | release-drafter.yml | Push to main, PRs | Auto-generates release notes |
+| **Label Sync** | labels.yml | Push to main, Manual | Syncs repository labels |
+| **Stale Bot** | stale.yml | Daily | Closes inactive issues/PRs |
+| **Deploy API** | deploy-api.yml | Tags `v*.*.*`, Manual | Creates Linux/Windows API packages |
+| **Deploy Android** | deploy-android.yml | Tags `android-v*.*.*`, Manual | Builds Android APK |
+| **Deploy Windows** | deploy-windows.yml | Tags `windows-v*.*.*`, Manual | Builds Windows desktop app |
+
+**CI Workflow Details (ci.yml):**
+- Runs on ubuntu-latest with .NET 9.0.x
+- Steps: Checkout → Setup .NET → Restore → Build → Test → Format check
+- Format check uses `continue-on-error: true` (formatting errors don't fail the build)
+- Tests are run with: `dotnet test TerminplanerApi.Tests/TerminplanerApi.Tests.csproj --configuration Release`
+
+**Important CI Notes:**
+- MAUI workloads are NOT available in standard GitHub Actions runners
+- CI workflows build and test the API project only (not MAUI)
+- Docker builds include running tests as part of the multi-stage build
+- All workflows use `dotnet-version: 9.0.x`
+
+If adding new CI/CD workflows:
 - Create `.github/workflows/` directory
 - Common workflows: build.yml, test.yml, deploy.yml
 
@@ -450,11 +490,12 @@ TerminplanerMaui/
 4. **Run tests (MANDATORY):**
    ```bash
    cd ..
-   dotnet test
+   dotnet test TerminplanerApi.Tests/TerminplanerApi.Tests.csproj
    ```
    - **CRITICAL**: All tests MUST pass (exit code 0)
    - If any test fails, fix the issue before committing
    - Test failures indicate broken functionality
+   - **NOTE**: Use project-specific path to avoid MAUI workload requirement
 
 5. **Build MAUI (optional, requires workloads):**
    ```bash
@@ -468,6 +509,44 @@ TerminplanerMaui/
    ```
 
 All commands should complete successfully with exit code 0. **Tests are mandatory and must pass.**
+
+## Docker Deployment
+
+The project includes Docker support for easy deployment:
+
+**Docker Configuration:**
+- **Dockerfile**: Multi-stage build for optimized production image
+- **Base Images**: mcr.microsoft.com/dotnet/sdk:9.0 (build), mcr.microsoft.com/dotnet/aspnet:9.0 (runtime)
+- **docker-compose.yml**: Quick local deployment setup
+
+**Build Docker image:**
+```bash
+docker build -t terminplaner-api .
+```
+- Builds API in Release configuration
+- Runs all tests during build (build fails if tests fail)
+- Creates optimized production image
+- Takes ~2-3 minutes for initial build
+
+**Run with Docker Compose:**
+```bash
+docker-compose up
+```
+- Starts API on http://localhost:5215
+- Includes health check endpoint
+- Runs as non-root user (appuser)
+
+**Pull from GitHub Container Registry:**
+```bash
+docker pull ghcr.io/mistalan/terminplaner/api:latest
+docker run -p 5215:5215 ghcr.io/mistalan/terminplaner/api:latest
+```
+
+**Important Docker Notes:**
+- Docker build includes test execution as a quality gate
+- Health check: `curl -f http://localhost:5215/api/appointments`
+- Environment: `ASPNETCORE_ENVIRONMENT=Production`
+- Port: 5215 (exposed)
 
 ## Common Issues and Troubleshooting
 
@@ -486,6 +565,9 @@ All commands should complete successfully with exit code 0. **Tests are mandator
   dotnet workload install maui-android maui-ios maui-windows maui-maccatalyst
   ```
 - **Note**: In CI environments, MAUI workloads may not be available. Focus on building the API project.
+- **Workaround**: Use project-specific commands instead of solution-level:
+  - `dotnet build TerminplanerApi/TerminplanerApi.csproj` (works without MAUI)
+  - `dotnet test TerminplanerApi.Tests/TerminplanerApi.Tests.csproj` (works without MAUI)
 
 **Issue: NuGet package restore failures**
 - **Solution**: Clear NuGet cache and restore:
@@ -577,12 +659,12 @@ All commands should complete successfully with exit code 0. **Tests are mandator
 | Command | Purpose | Time | Exit Code |
 |---------|---------|------|-----------|
 | `dotnet --version` | Check .NET version | <1s | 0 |
-| `cd TerminplanerApi && dotnet restore` | Restore API packages | 3-5s | 0 |
-| `cd TerminplanerApi && dotnet clean` | Remove API build artifacts | 2-3s | 0 |
-| `cd TerminplanerApi && dotnet build` | Compile API project | 10-15s | 0 if success |
+| `cd TerminplanerApi && dotnet restore` | Restore API packages | ~2s | 0 |
+| `cd TerminplanerApi && dotnet clean` | Remove API build artifacts | ~3s | 0 |
+| `cd TerminplanerApi && dotnet build` | Compile API project | ~12s | 0 if success |
 | `cd TerminplanerApi && dotnet run` | Start API server | N/A | N/A (runs until stopped) |
 | `cd TerminplanerApi && dotnet watch run` | Start API with hot reload | N/A | N/A (runs until stopped) |
-| `cd TerminplanerApi && dotnet format` | Format API code | 2-3s | 0 |
+| `cd TerminplanerApi && dotnet format` | Format API code | ~3s | 0 |
 
 ### Frontend MAUI Commands
 
@@ -599,23 +681,27 @@ All commands should complete successfully with exit code 0. **Tests are mandator
 
 | Command | Purpose | Time | Exit Code |
 |---------|---------|------|-----------|
-| `dotnet test` | Run all tests (MANDATORY) | 3-5s | 0 if all tests pass |
-| `dotnet test --logger "console;verbosity=detailed"` | Run tests with details | 3-5s | 0 if all tests pass |
+| `dotnet test` | Run all tests (MANDATORY) | ~6s | 0 if all tests pass |
+| `dotnet test TerminplanerApi.Tests/TerminplanerApi.Tests.csproj` | Run API tests only | ~10s | 0 if all tests pass |
+| `dotnet test --logger "console;verbosity=detailed"` | Run tests with details | ~6s | 0 if all tests pass |
 | `dotnet test --filter "TC_U001"` | Run specific test | <1s | 0 if test passes |
-| `dotnet test --filter "FullyQualifiedName~AppointmentServiceTests"` | Run unit tests only | 2-3s | 0 if all unit tests pass |
-| `dotnet test --filter "FullyQualifiedName~AppointmentApiIntegrationTests"` | Run integration tests only | 2-3s | 0 if all integration tests pass |
-| `dotnet format --verify-no-changes` | Check formatting | 2-3s | 0 if formatted |
-| `dotnet format` | Format all code | 2-3s | 0 |
+| `dotnet test --filter "FullyQualifiedName~AppointmentServiceTests"` | Run unit tests only | ~3s | 0 if all unit tests pass |
+| `dotnet test --filter "FullyQualifiedName~AppointmentApiIntegrationTests"` | Run integration tests only | ~4s | 0 if all integration tests pass |
+| `dotnet format --verify-no-changes` | Check formatting | ~3s | 0 if formatted |
+| `dotnet format` | Format all code | ~3s | 0 |
 
 ## Trust These Instructions
 
 These instructions have been validated by:
 - Examining the actual project structure with API, Tests, and MAUI projects
-- Building and running the API project successfully
-- Running all tests successfully (100% pass rate)
-- Reviewing the README.md, QUICKSTART.md, and TEST_CASES.md documentation
+- Building and running the API project successfully (~12s build time)
+- Running all 42 tests successfully (100% pass rate, ~6s runtime)
+- Reviewing the README.md, TEST_CASES.md, and other documentation files
 - Verifying project files (TerminplanerApi.csproj, TerminplanerApi.Tests.csproj, and TerminplanerMaui.csproj)
-- Confirming available .NET SDKs in the CI environment
+- Confirming available .NET SDKs in the CI environment (9.0.305 default)
+- Testing clean, restore, build, test, and format commands
+- Verifying all 10 GitHub Actions workflows in .github/workflows/
+- Confirming Docker build configuration in Dockerfile and docker-compose.yml
 
 **Architecture Notes:**
 - The repository contains THREE main projects: TerminplanerApi (backend), TerminplanerApi.Tests (tests), and TerminplanerMaui (frontend)
