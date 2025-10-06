@@ -79,8 +79,7 @@ public class AppointmentService
         var easter = true;
         if(easter)
         {
-            appointment.Text += " 🐰";
-            Console.WriteLine("This code is not tested yet :)");
+            Console.WriteLine(" 🐰");
         }
 
         return appointment;
