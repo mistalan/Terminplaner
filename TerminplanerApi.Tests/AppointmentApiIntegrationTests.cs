@@ -123,7 +123,7 @@ public class AppointmentApiIntegrationTests : IClassFixture<WebApplicationFactor
 
         // Assert
         Assert.NotNull(created);
-        Assert.True(created.Id > 0);
+        Assert.False(string.IsNullOrEmpty(created.Id));
         Assert.Equal("New Appointment", created.Text);
         Assert.Equal("Work", created.Category);
     }
@@ -171,7 +171,7 @@ public class AppointmentApiIntegrationTests : IClassFixture<WebApplicationFactor
 
         // Assert
         Assert.NotNull(created);
-        Assert.True(created.Id > 0);
+        Assert.False(string.IsNullOrEmpty(created.Id));
         Assert.Equal("Test", created.Text);
     }
 
@@ -326,7 +326,7 @@ public class AppointmentApiIntegrationTests : IClassFixture<WebApplicationFactor
             new Appointment { Text = "Second", Priority = 2 });
         var appt2 = await appt2Response.Content.ReadFromJsonAsync<Appointment>();
 
-        var priorities = new Dictionary<int, int>
+        var priorities = new Dictionary<string, int>
         {
             { appt1!.Id, 2 },
             { appt2!.Id, 1 }

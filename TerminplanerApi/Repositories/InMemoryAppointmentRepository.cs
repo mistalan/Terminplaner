@@ -1,18 +1,18 @@
 using TerminplanerApi.Models;
 
-namespace TerminplanerApi.Services;
+namespace TerminplanerApi.Repositories;
 
-public class AppointmentService
+public class InMemoryAppointmentRepository : IAppointmentRepository
 {
     private readonly List<Appointment> _appointments = new();
     private int _nextId = 1;
 
-    public AppointmentService()
+    public InMemoryAppointmentRepository()
     {
         // Add some sample data matching legacy scheduler
         _appointments.Add(new Appointment
         {
-            Id = _nextId++,
+            Id = _nextId++.ToString(),
             Text = "Zahnarzttermin",
             Category = "Gesundheit",
             Color = "#FF0000",
@@ -22,7 +22,7 @@ public class AppointmentService
         });
         _appointments.Add(new Appointment
         {
-            Id = _nextId++,
+            Id = _nextId++.ToString(),
             Text = "Projekt abschließen",
             Category = "Arbeit",
             Color = "#0000FF",
@@ -32,7 +32,7 @@ public class AppointmentService
         });
         _appointments.Add(new Appointment
         {
-            Id = _nextId++,
+            Id = _nextId++.ToString(),
             Text = "Lebensmittel einkaufen",
             Category = "Privat",
             Color = "#00FF00",
@@ -43,13 +43,21 @@ public class AppointmentService
         });
     }
 
-    public List<Appointment> GetAll() => _appointments.OrderBy(a => a.Priority).ToList();
-
-    public Appointment? GetById(int id) => _appointments.FirstOrDefault(a => a.Id == id);
-
-    public Appointment Create(Appointment appointment)
+    public Task<List<Appointment>> GetAllAsync()
     {
-        appointment.Id = _nextId++;
+        var result = _appointments.OrderBy(a => a.Priority).ToList();
+        return Task.FromResult(result);
+    }
+
+    public Task<Appointment?> GetByIdAsync(string id)
+    {
+        var appointment = _appointments.FirstOrDefault(a => a.Id == id);
+        return Task.FromResult(appointment);
+    }
+
+    public Task<Appointment> CreateAsync(Appointment appointment)
+    {
+        appointment.Id = _nextId++.ToString();
         appointment.CreatedAt = DateTime.Now;
 
         // Set priority to last if not specified
@@ -59,13 +67,13 @@ public class AppointmentService
         }
 
         _appointments.Add(appointment);
-        return appointment;
+        return Task.FromResult(appointment);
     }
 
-    public Appointment? Update(int id, Appointment updatedAppointment)
+    public Task<Appointment?> UpdateAsync(string id, Appointment updatedAppointment)
     {
         var appointment = _appointments.FirstOrDefault(a => a.Id == id);
-        if (appointment == null) return null;
+        if (appointment == null) return Task.FromResult<Appointment?>(null);
 
         appointment.Text = updatedAppointment.Text;
         appointment.Category = updatedAppointment.Category;
@@ -75,19 +83,19 @@ public class AppointmentService
         appointment.Duration = updatedAppointment.Duration;
         appointment.IsOutOfHome = updatedAppointment.IsOutOfHome;
 
-        return appointment;
+        return Task.FromResult<Appointment?>(appointment);
     }
 
-    public bool Delete(int id)
+    public Task<bool> DeleteAsync(string id)
     {
         var appointment = _appointments.FirstOrDefault(a => a.Id == id);
-        if (appointment == null) return false;
+        if (appointment == null) return Task.FromResult(false);
 
         _appointments.Remove(appointment);
-        return true;
+        return Task.FromResult(true);
     }
 
-    public void UpdatePriorities(Dictionary<int, int> priorities)
+    public Task UpdatePrioritiesAsync(Dictionary<string, int> priorities)
     {
         foreach (var kvp in priorities)
         {
@@ -97,5 +105,6 @@ public class AppointmentService
                 appointment.Priority = kvp.Value;
             }
         }
+        return Task.CompletedTask;
     }
 }
