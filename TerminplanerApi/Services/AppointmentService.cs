@@ -75,13 +75,6 @@ public class AppointmentService
         appointment.Duration = updatedAppointment.Duration;
         appointment.IsOutOfHome = updatedAppointment.IsOutOfHome;
 
-        // This code should test if code coverage tools are working
-        var easter = true;
-        if (easter)
-        {
-            Console.WriteLine(" 🐰");
-        }
-
         return appointment;
     }
 
@@ -104,5 +97,10 @@ public class AppointmentService
                 appointment.Priority = kvp.Value;
             }
         }
+    }
+
+    public string Foo(bool isEaster)
+    {
+         return isEaster ? "Happy Easter!" : "Hello!";
     }
 }
