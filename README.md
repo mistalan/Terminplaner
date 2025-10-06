@@ -33,7 +33,7 @@ Moderne Terminplaner-App für die Verwaltung von Terminen mit Kategorien und Pri
 - **Backend**: ASP.NET Core 9.0 Web API (C#)
 - **Frontend**: .NET MAUI (Multi-platform App UI) mit XAML
 - **Pattern**: MVVM (Model-View-ViewModel) mit CommunityToolkit.Mvvm
-- **Datenspeicher**: In-Memory (Liste) im Backend
+- **Datenspeicher**: Repository Pattern mit In-Memory (Standard) oder Azure Cosmos DB (optional)
 - **API**: RESTful API mit JSON
 - **Deployment**: Android, iOS, Windows, macOS
 
@@ -164,13 +164,15 @@ Terminplaner/
 ├── TerminplanerApi/              # Backend Web API
 │   ├── Models/
 │   │   └── Appointment.cs        # Datenmodell für Termine
-│   ├── Services/
-│   │   └── AppointmentService.cs # Business-Logik & In-Memory Speicher
+│   ├── Repositories/
+│   │   ├── IAppointmentRepository.cs # Repository-Interface
+│   │   ├── InMemoryAppointmentRepository.cs # In-Memory Implementierung
+│   │   └── CosmosAppointmentRepository.cs # Azure Cosmos DB Implementierung
 │   ├── Program.cs                # API-Konfiguration & Endpoints
 │   └── TerminplanerApi.csproj    # Backend-Projekt-Datei
 │
 ├── TerminplanerApi.Tests/        # Tests für Backend API
-│   ├── AppointmentServiceTests.cs      # Unit Tests (23)
+│   ├── AppointmentRepositoryTests.cs      # Unit Tests (23)
 │   ├── AppointmentApiIntegrationTests.cs # Integration Tests (19)
 │   ├── TEST_CASES.md             # Detaillierte Test-Dokumentation
 │   └── TerminplanerApi.Tests.csproj    # Test-Projekt-Datei
@@ -219,9 +221,21 @@ dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage
 
 **Detaillierte Test-Dokumentation:** Siehe [TerminplanerApi.Tests/TEST_CASES.md](TerminplanerApi.Tests/TEST_CASES.md)
 
+## 💾 Persistence Architecture
+
+Das Projekt verwendet das **Repository Pattern** mit Abstraktionsschicht für flexible Datenspeicherung:
+
+- ✅ **In-Memory Repository** (Standard) - Für Entwicklung und Tests
+- ✅ **Azure Cosmos DB Repository** - Für Produktion (optional)
+- ✅ **Einfache Konfiguration** - Umschalten via `appsettings.json`
+- ✅ **String-basierte IDs** - Kompatibel mit Cosmos DB und anderen NoSQL-Datenbanken
+
+**Detaillierte Dokumentation:** Siehe [PERSISTENCE_ARCHITECTURE.md](PERSISTENCE_ARCHITECTURE.md)
+
+**Persistency Evaluation:** Siehe [PERSISTENCY_EVALUATION.md](PERSISTENCY_EVALUATION.md) für eine umfassende Analyse von NoSQL-Datenbanken und Cloud-Services
+
 ## 🔮 Zukünftige Erweiterungen
 
-- 💾 **Persistente Datenspeicherung** (NoSQL/Cloud-Datenbank) - 📄 Siehe [Persistency Evaluation](PERSISTENCY_EVALUATION.md) für eine umfassende Analyse von NoSQL-Datenbanken und Cloud-Services
 - 🔔 Benachrichtigungen und Erinnerungen
 - 📅 Kalenderintegration
 - 👥 Mehrbenutzer-Unterstützung

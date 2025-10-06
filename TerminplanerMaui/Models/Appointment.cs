@@ -2,7 +2,7 @@ namespace TerminplanerMaui.Models;
 
 public class Appointment
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
     public string Category { get; set; } = "Standard";
     public string Color { get; set; } = "#808080";
