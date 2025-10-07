@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using TerminplanerApi.Models;
+using TerminplanerApi.Repositories;
 
 namespace TerminplanerApi.Tests;
 
@@ -12,6 +14,18 @@ public class AppointmentApiIntegrationTests : IClassFixture<WebApplicationFactor
     public AppointmentApiIntegrationTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
+    }
+
+    [Fact]
+    public void TC_I000_DependencyInjection_RegistersInMemoryRepository()
+    {
+        // Arrange & Act - access the service provider
+        var scope = _factory.Services.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IAppointmentRepository>();
+
+        // Assert
+        Assert.NotNull(repository);
+        Assert.IsType<InMemoryAppointmentRepository>(repository);
     }
 
     #region GET /api/appointments Tests
