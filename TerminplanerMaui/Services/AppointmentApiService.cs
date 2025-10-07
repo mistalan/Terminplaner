@@ -34,7 +34,7 @@ public class AppointmentApiService
         }
     }
 
-    public async Task<Appointment?> GetAppointmentAsync(int id)
+    public async Task<Appointment?> GetAppointmentAsync(string id)
     {
         try
         {
@@ -62,7 +62,7 @@ public class AppointmentApiService
         }
     }
 
-    public async Task<Appointment?> UpdateAppointmentAsync(int id, Appointment appointment)
+    public async Task<Appointment?> UpdateAppointmentAsync(string id, Appointment appointment)
     {
         try
         {
@@ -77,7 +77,7 @@ public class AppointmentApiService
         }
     }
 
-    public async Task<bool> DeleteAppointmentAsync(int id)
+    public async Task<bool> DeleteAppointmentAsync(string id)
     {
         try
         {
@@ -91,7 +91,7 @@ public class AppointmentApiService
         }
     }
 
-    public async Task<bool> UpdatePrioritiesAsync(Dictionary<int, int> priorities)
+    public async Task<bool> UpdatePrioritiesAsync(Dictionary<string, int> priorities)
     {
         try
         {

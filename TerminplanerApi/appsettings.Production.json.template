@@ -1,0 +1,15 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "CosmosDb": {
+    "ConnectionString": "",
+    "DatabaseId": "db_1",
+    "ContainerId": "container_1"
+  },
+  "RepositoryType": "CosmosDb"
+}

@@ -1,10 +1,37 @@
+using Microsoft.Azure.Cosmos;
 using TerminplanerApi.Models;
-using TerminplanerApi.Services;
+using TerminplanerApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddSingleton<AppointmentService>();
+var repositoryType = builder.Configuration.GetValue<string>("RepositoryType") ?? "InMemory";
+
+if (repositoryType == "CosmosDb")
+{
+    // Configure Cosmos DB
+    var cosmosConnectionString = builder.Configuration.GetValue<string>("CosmosDb:ConnectionString");
+    var databaseId = builder.Configuration.GetValue<string>("CosmosDb:DatabaseId");
+    var containerId = builder.Configuration.GetValue<string>("CosmosDb:ContainerId");
+
+    if (string.IsNullOrEmpty(cosmosConnectionString) || string.IsNullOrEmpty(databaseId) || string.IsNullOrEmpty(containerId))
+    {
+        throw new InvalidOperationException("CosmosDb configuration is missing in appsettings.json");
+    }
+
+    builder.Services.AddSingleton<CosmosClient>(sp => new CosmosClient(cosmosConnectionString));
+    builder.Services.AddSingleton<IAppointmentRepository>(sp =>
+    {
+        var cosmosClient = sp.GetRequiredService<CosmosClient>();
+        return new CosmosAppointmentRepository(cosmosClient, databaseId, containerId);
+    });
+}
+else
+{
+    // Use in-memory repository (default)
+    builder.Services.AddSingleton<IAppointmentRepository, InMemoryAppointmentRepository>();
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -27,43 +54,44 @@ if (app.Environment.IsDevelopment())
 }
 
 // API Endpoints
-app.MapGet("/api/appointments", (AppointmentService service) =>
+app.MapGet("/api/appointments", async (IAppointmentRepository repository) =>
 {
-    return Results.Ok(service.GetAll());
+    var appointments = await repository.GetAllAsync();
+    return Results.Ok(appointments);
 })
 .WithName("GetAppointments");
 
-app.MapGet("/api/appointments/{id}", (int id, AppointmentService service) =>
+app.MapGet("/api/appointments/{id}", async (string id, IAppointmentRepository repository) =>
 {
-    var appointment = service.GetById(id);
+    var appointment = await repository.GetByIdAsync(id);
     return appointment is not null ? Results.Ok(appointment) : Results.NotFound();
 })
 .WithName("GetAppointment");
 
-app.MapPost("/api/appointments", (Appointment appointment, AppointmentService service) =>
+app.MapPost("/api/appointments", async (Appointment appointment, IAppointmentRepository repository) =>
 {
-    var created = service.Create(appointment);
+    var created = await repository.CreateAsync(appointment);
     return Results.Created($"/api/appointments/{created.Id}", created);
 })
 .WithName("CreateAppointment");
 
-app.MapPut("/api/appointments/{id}", (int id, Appointment appointment, AppointmentService service) =>
+app.MapPut("/api/appointments/{id}", async (string id, Appointment appointment, IAppointmentRepository repository) =>
 {
-    var updated = service.Update(id, appointment);
+    var updated = await repository.UpdateAsync(id, appointment);
     return updated is not null ? Results.Ok(updated) : Results.NotFound();
 })
 .WithName("UpdateAppointment");
 
-app.MapDelete("/api/appointments/{id}", (int id, AppointmentService service) =>
+app.MapDelete("/api/appointments/{id}", async (string id, IAppointmentRepository repository) =>
 {
-    var deleted = service.Delete(id);
+    var deleted = await repository.DeleteAsync(id);
     return deleted ? Results.NoContent() : Results.NotFound();
 })
 .WithName("DeleteAppointment");
 
-app.MapPut("/api/appointments/priorities", (Dictionary<int, int> priorities, AppointmentService service) =>
+app.MapPut("/api/appointments/priorities", async (Dictionary<string, int> priorities, IAppointmentRepository repository) =>
 {
-    service.UpdatePriorities(priorities);
+    await repository.UpdatePrioritiesAsync(priorities);
     return Results.Ok();
 })
 .WithName("UpdatePriorities");

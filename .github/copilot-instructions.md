@@ -20,8 +20,8 @@
 - **Runtime**: .NET SDK 9.0.x or later
 - **Backend Framework**: ASP.NET Core 9.0 (Web API)
 - **Frontend Framework**: .NET MAUI (Multi-platform App UI) with XAML
-- **Pattern**: MVVM (Model-View-ViewModel) with CommunityToolkit.Mvvm
-- **Data Storage**: In-Memory (List) in backend
+- **Pattern**: MVVM (Model-View-ViewModel) with CommunityToolkit.Mvvm, Repository Pattern (backend)
+- **Data Storage**: Repository Pattern with In-Memory (default) or Azure Cosmos DB (optional)
 - **API**: RESTful API with JSON
 - **Build Tool**: dotnet CLI
 - **Version Control**: Git
@@ -186,8 +186,8 @@ dotnet test --filter "FullyQualifiedName~AppointmentApiIntegrationTests"
 - Test documentation: See [TEST_CASES.md](TerminplanerApi.Tests/TEST_CASES.md) and [TerminplanerApi.Tests/README.md](TerminplanerApi.Tests/README.md)
 
 **Test coverage:**
-- **Unit Tests (23)**: AppointmentService business logic
-  - GetAll, GetById, Create, Update, Delete, UpdatePriorities
+- **Unit Tests (23)**: Repository business logic (InMemoryAppointmentRepository)
+  - GetAllAsync, GetByIdAsync, CreateAsync, UpdateAsync, DeleteAsync, UpdatePrioritiesAsync
   - Edge cases: empty text, null category
 - **Integration Tests (19)**: API endpoints
   - GET /api/appointments, GET /api/appointments/{id}
@@ -309,9 +309,11 @@ TerminplanerApi/
 ├── Properties/
 │   └── launchSettings.json  # Development launch profiles
 ├── Models/
-│   └── Appointment.cs  # Data model for appointments
-├── Services/
-│   └── AppointmentService.cs  # Business logic & in-memory storage
+│   └── Appointment.cs  # Data model for appointments (string ID for Cosmos DB)
+├── Repositories/
+│   ├── IAppointmentRepository.cs  # Repository interface
+│   ├── InMemoryAppointmentRepository.cs  # In-memory implementation
+│   └── CosmosAppointmentRepository.cs  # Azure Cosmos DB implementation
 ├── bin/                # Build output (ignored by git)
 └── obj/                # Intermediate build files (ignored by git)
 ```
@@ -319,7 +321,7 @@ TerminplanerApi/
 ### Test Project Structure (TerminplanerApi.Tests)
 ```
 TerminplanerApi.Tests/
-├── AppointmentServiceTests.cs  # Unit tests (23 tests)
+├── AppointmentRepositoryTests.cs  # Unit tests (23 tests)
 ├── AppointmentApiIntegrationTests.cs  # Integration tests (19 tests)
 ├── README.md           # Test documentation
 ├── TerminplanerApi.Tests.csproj  # Test project file

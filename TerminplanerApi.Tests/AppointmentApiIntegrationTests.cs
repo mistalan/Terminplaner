@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using TerminplanerApi.Models;
+using TerminplanerApi.Repositories;
 
 namespace TerminplanerApi.Tests;
 
@@ -12,6 +14,18 @@ public class AppointmentApiIntegrationTests : IClassFixture<WebApplicationFactor
     public AppointmentApiIntegrationTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
+    }
+
+    [Fact]
+    public void TC_I000_DependencyInjection_RegistersInMemoryRepository()
+    {
+        // Arrange & Act - access the service provider
+        var scope = _factory.Services.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IAppointmentRepository>();
+
+        // Assert
+        Assert.NotNull(repository);
+        Assert.IsType<InMemoryAppointmentRepository>(repository);
     }
 
     #region GET /api/appointments Tests
@@ -123,7 +137,7 @@ public class AppointmentApiIntegrationTests : IClassFixture<WebApplicationFactor
 
         // Assert
         Assert.NotNull(created);
-        Assert.True(created.Id > 0);
+        Assert.False(string.IsNullOrEmpty(created.Id));
         Assert.Equal("New Appointment", created.Text);
         Assert.Equal("Work", created.Category);
     }
@@ -171,7 +185,7 @@ public class AppointmentApiIntegrationTests : IClassFixture<WebApplicationFactor
 
         // Assert
         Assert.NotNull(created);
-        Assert.True(created.Id > 0);
+        Assert.False(string.IsNullOrEmpty(created.Id));
         Assert.Equal("Test", created.Text);
     }
 
@@ -326,7 +340,7 @@ public class AppointmentApiIntegrationTests : IClassFixture<WebApplicationFactor
             new Appointment { Text = "Second", Priority = 2 });
         var appt2 = await appt2Response.Content.ReadFromJsonAsync<Appointment>();
 
-        var priorities = new Dictionary<int, int>
+        var priorities = new Dictionary<string, int>
         {
             { appt1!.Id, 2 },
             { appt2!.Id, 1 }

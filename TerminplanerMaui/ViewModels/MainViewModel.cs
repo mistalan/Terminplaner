@@ -159,7 +159,7 @@ public partial class MainViewModel : ObservableObject
         if (idx <= 0) return;
         var other = Appointments[idx - 1];
 
-        var priorities = new Dictionary<int, int>
+        var priorities = new Dictionary<string, int>
         {
             { appointment.Id, other.Priority },
             { other.Id, appointment.Priority }
@@ -176,7 +176,7 @@ public partial class MainViewModel : ObservableObject
         if (idx >= Appointments.Count - 1) return;
         var other = Appointments[idx + 1];
 
-        var priorities = new Dictionary<int, int>
+        var priorities = new Dictionary<string, int>
         {
             { appointment.Id, other.Priority },
             { other.Id, appointment.Priority }
