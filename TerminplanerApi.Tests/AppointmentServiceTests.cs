@@ -66,6 +66,37 @@ public class AppointmentRepositoryTests
         Assert.Contains(appointments, a => a.Text == "Lebensmittel einkaufen");
     }
 
+    [Fact]
+    public async Task TC_U022_SampleData_HasCorrectProperties()
+    {
+        // Arrange & Act
+        var repository = new InMemoryAppointmentRepository();
+        var appointments = await repository.GetAllAsync();
+
+        // Assert - verify sample data properties are correctly set
+        var zahnarzt = appointments.First(a => a.Text == "Zahnarzttermin");
+        Assert.Equal("Gesundheit", zahnarzt.Category);
+        Assert.Equal("#FF0000", zahnarzt.Color);
+        Assert.Equal(1, zahnarzt.Priority);
+        Assert.NotNull(zahnarzt.ScheduledDate);
+        Assert.Equal("1 Std", zahnarzt.Duration);
+
+        var projekt = appointments.First(a => a.Text == "Projekt abschließen");
+        Assert.Equal("Arbeit", projekt.Category);
+        Assert.Equal("#0000FF", projekt.Color);
+        Assert.Equal(2, projekt.Priority);
+        Assert.NotNull(projekt.ScheduledDate);
+        Assert.Equal("2-3 Std", projekt.Duration);
+
+        var einkaufen = appointments.First(a => a.Text == "Lebensmittel einkaufen");
+        Assert.Equal("Privat", einkaufen.Category);
+        Assert.Equal("#00FF00", einkaufen.Color);
+        Assert.Equal(3, einkaufen.Priority);
+        Assert.NotNull(einkaufen.ScheduledDate);
+        Assert.Equal("30 min", einkaufen.Duration);
+        Assert.True(einkaufen.IsOutOfHome);
+    }
+
     #endregion
 
     #region GetById Tests
@@ -146,6 +177,19 @@ public class AppointmentRepositoryTests
 
         // Assert
         Assert.Equal(3, newAppointment.Priority);
+    }
+
+    [Fact]
+    public async Task TC_U023_Create_AssignsPriority1_WhenEmptyRepository()
+    {
+        // Arrange
+        var repository = await CreateEmptyRepositoryAsync();
+
+        // Act
+        var newAppointment = await repository.CreateAsync(new Appointment { Text = "First", Priority = 0 });
+
+        // Assert
+        Assert.Equal(1, newAppointment.Priority);
     }
 
     [Fact]
