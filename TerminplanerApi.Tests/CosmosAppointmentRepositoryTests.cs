@@ -364,6 +364,73 @@ public class CosmosAppointmentRepositoryTests
         Assert.Equal("test-id", result!.Id);
     }
 
+    [Fact]
+    public async Task TC_C016_UpdateAsync_ReturnsNull_WhenReplaceThrowsNotFound()
+    {
+        // Arrange
+        var existing = new Appointment { Id = "test-id", Text = "Original" };
+        var updated = new Appointment { Text = "Updated" };
+        
+        var readResponse = new Mock<ItemResponse<Appointment>>();
+        readResponse.Setup(r => r.Resource).Returns(existing);
+        
+        _mockContainer
+            .Setup(c => c.ReadItemAsync<Appointment>(
+                "test-id",
+                It.IsAny<PartitionKey>(),
+                It.IsAny<ItemRequestOptions>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(readResponse.Object);
+
+        _mockContainer
+            .Setup(c => c.ReplaceItemAsync(
+                It.IsAny<Appointment>(),
+                "test-id",
+                It.IsAny<PartitionKey>(),
+                It.IsAny<ItemRequestOptions>(),
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new CosmosException("Not found during replace", HttpStatusCode.NotFound, 0, "", 0));
+
+        // Act
+        var result = await _repository.UpdateAsync("test-id", updated);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task TC_C017_UpdateAsync_ThrowsException_WhenReplaceThrowsNonNotFoundError()
+    {
+        // Arrange
+        var existing = new Appointment { Id = "test-id", Text = "Original" };
+        var updated = new Appointment { Text = "Updated" };
+        
+        var readResponse = new Mock<ItemResponse<Appointment>>();
+        readResponse.Setup(r => r.Resource).Returns(existing);
+        
+        _mockContainer
+            .Setup(c => c.ReadItemAsync<Appointment>(
+                "test-id",
+                It.IsAny<PartitionKey>(),
+                It.IsAny<ItemRequestOptions>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(readResponse.Object);
+
+        _mockContainer
+            .Setup(c => c.ReplaceItemAsync(
+                It.IsAny<Appointment>(),
+                "test-id",
+                It.IsAny<PartitionKey>(),
+                It.IsAny<ItemRequestOptions>(),
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new CosmosException("Service unavailable", HttpStatusCode.ServiceUnavailable, 0, "", 0));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<CosmosException>(
+            async () => await _repository.UpdateAsync("test-id", updated)
+        );
+    }
+
     #endregion
 
     #region DeleteAsync Tests
