@@ -1,0 +1,42 @@
+# Codecov Configuration
+# Documentation: https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        informational: false
+    patch:
+      default:
+        target: 80%
+        threshold: 5%
+        informational: false
+
+  # Ignore paths from coverage reporting
+  # Program.cs contains ASP.NET Core startup/middleware configuration - tested via integration tests
+  # MAUI app files contain platform-specific initialization and UI code - requires platform-specific testing
+  ignore:
+    - "TerminplanerApi/Program.cs"              # API startup/middleware configuration
+    - "TerminplanerMaui/**"                     # Entire MAUI project (platform-specific code)
+    - "**/MauiProgram.cs"                       # MAUI app initialization
+    - "**/App.xaml.cs"                          # MAUI app definition
+    - "**/AppShell.xaml.cs"                     # MAUI shell/navigation
+    - "**/*.xaml.cs"                            # All XAML code-behind files
+    - "**/Platforms/**"                         # Platform-specific code (Android, iOS, Windows, macOS)
+    - "**/bin/**"                               # Build output
+    - "**/obj/**"                               # Intermediate build files
+    - "**/*.Designer.cs"                        # Generated designer files
+    - "**/Migrations/**"                        # Database migrations
+
+comment:
+  layout: "reach,diff,flags,tree,footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+# GitHub Checks integration
+github_checks:
+  annotations: true
