@@ -230,11 +230,13 @@ Das Projekt verwendet das **Repository Pattern** mit Abstraktionsschicht für fl
 - ✅ **Einfache Konfiguration** - Umschalten via `appsettings.json`
 - ✅ **String-basierte IDs** - Kompatibel mit Cosmos DB und anderen NoSQL-Datenbanken
 
-**Detaillierte Dokumentation:** Siehe [PERSISTENCE_ARCHITECTURE.md](PERSISTENCE_ARCHITECTURE.md)
-
-**Sicherheitskonfiguration:** Siehe [SECURITY_CONFIGURATION.md](SECURITY_CONFIGURATION.md) für sichere Konfiguration von Azure Cosmos DB Credentials
-
-**Persistency Evaluation:** Siehe [PERSISTENCY_EVALUATION.md](PERSISTENCY_EVALUATION.md) für eine umfassende Analyse von NoSQL-Datenbanken und Cloud-Services
+**Dokumentation:**
+- [PERSISTENCE_ARCHITECTURE.md](PERSISTENCE_ARCHITECTURE.md) - Repository Pattern und Architektur
+- [SECURITY_CONFIGURATION.md](SECURITY_CONFIGURATION.md) - Sichere Konfiguration von Credentials
+- [CODESPACES_SETUP.md](CODESPACES_SETUP.md) - GitHub Codespaces Konfiguration
+- [AZURE_KEYVAULT_SETUP.md](AZURE_KEYVAULT_SETUP.md) - Azure Key Vault Setup und GitHub Actions Integration
+- [GIT_HISTORY_CLEANUP.md](GIT_HISTORY_CLEANUP.md) - Git History bereinigen (bei versehentlich committeten Secrets)
+- [PERSISTENCY_EVALUATION.md](PERSISTENCY_EVALUATION.md) - Umfassende Analyse von NoSQL-Datenbanken
 
 ## 🔮 Zukünftige Erweiterungen
 
