@@ -1,66 +1,11 @@
-using Microsoft.Azure.Cosmos;
+using TerminplanerApi.Configuration;
 using TerminplanerApi.Models;
 using TerminplanerApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var repositoryType = builder.Configuration.GetValue<string>("RepositoryType") ?? "InMemory";
-
-if (repositoryType == "CosmosDb")
-{
-    // Configure Cosmos DB
-    var cosmosConnectionString = builder.Configuration.GetValue<string>("CosmosDb:ConnectionString");
-    var databaseId = builder.Configuration.GetValue<string>("CosmosDb:DatabaseId");
-    var containerId = builder.Configuration.GetValue<string>("CosmosDb:ContainerId");
-
-    if (string.IsNullOrEmpty(cosmosConnectionString) || string.IsNullOrEmpty(databaseId) || string.IsNullOrEmpty(containerId))
-    {
-        throw new InvalidOperationException("CosmosDb configuration is missing in appsettings.json");
-    }
-
-    builder.Services.AddSingleton<CosmosClient>(sp => new CosmosClient(cosmosConnectionString));
-    builder.Services.AddSingleton<IAppointmentRepository>(sp =>
-    {
-        var cosmosClient = sp.GetRequiredService<CosmosClient>();
-        return new CosmosAppointmentRepository(cosmosClient, databaseId, containerId);
-    });
-}
-else if (repositoryType == "Sqlite")
-{
-    // Configure SQLite
-    var sqliteConnectionString = builder.Configuration.GetValue<string>("Sqlite:ConnectionString") ?? "Data Source=appointments.db";
-    builder.Services.AddSingleton<IAppointmentRepository>(sp =>
-        new SqliteAppointmentRepository(sqliteConnectionString));
-}
-else if (repositoryType == "Hybrid")
-{
-    // Configure Hybrid (SQLite + Cosmos DB with sync)
-    var sqliteConnectionString = builder.Configuration.GetValue<string>("Sqlite:ConnectionString") ?? "Data Source=appointments.db";
-    var cosmosConnectionString = builder.Configuration.GetValue<string>("CosmosDb:ConnectionString");
-    var databaseId = builder.Configuration.GetValue<string>("CosmosDb:DatabaseId");
-    var containerId = builder.Configuration.GetValue<string>("CosmosDb:ContainerId");
-
-    builder.Services.AddSingleton<IAppointmentRepository>(sp =>
-    {
-        var logger = sp.GetRequiredService<ILogger<HybridAppointmentRepository>>();
-        var localRepository = new SqliteAppointmentRepository(sqliteConnectionString);
-        
-        IAppointmentRepository? remoteRepository = null;
-        if (!string.IsNullOrEmpty(cosmosConnectionString) && !string.IsNullOrEmpty(databaseId) && !string.IsNullOrEmpty(containerId))
-        {
-            var cosmosClient = new CosmosClient(cosmosConnectionString);
-            remoteRepository = new CosmosAppointmentRepository(cosmosClient, databaseId, containerId);
-        }
-
-        return new HybridAppointmentRepository(localRepository, remoteRepository, logger);
-    });
-}
-else
-{
-    // Use in-memory repository (default)
-    builder.Services.AddSingleton<IAppointmentRepository, InMemoryAppointmentRepository>();
-}
+builder.Services.AddAppointmentRepository(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
@@ -76,14 +21,7 @@ builder.Services.AddOpenApi();
 var app = builder.Build();
 
 // Perform initial sync for Hybrid repository
-if (repositoryType == "Hybrid")
-{
-    var repository = app.Services.GetRequiredService<IAppointmentRepository>();
-    if (repository is HybridAppointmentRepository hybridRepository)
-    {
-        await hybridRepository.SyncAsync();
-    }
-}
+await app.InitializeRepositoryAsync(builder.Configuration);
 
 // Configure the HTTP request pipeline.
 app.UseCors();
