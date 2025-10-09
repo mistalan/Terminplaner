@@ -302,7 +302,49 @@ public class SqliteAppointmentRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task TC_S014_Create_PreservesProvidedCreatedAt()
+    public async Task TC_S014_Create_SetsCreatedAtWhenDefault()
+    {
+        // Arrange
+        var appointment = new Appointment 
+        { 
+            Text = "Test",
+            CreatedAt = default // Explicitly test default value
+        };
+        var before = DateTime.UtcNow.AddSeconds(-1);
+
+        // Act
+        var created = await _repository.CreateAsync(appointment);
+        var after = DateTime.UtcNow.AddSeconds(1);
+
+        // Assert
+        Assert.True(created.CreatedAt >= before);
+        Assert.True(created.CreatedAt <= after);
+        Assert.NotEqual(default(DateTime), created.CreatedAt);
+    }
+
+    [Fact]
+    public async Task TC_S014b_Create_SetsCreatedAtWhenMinValue()
+    {
+        // Arrange
+        var appointment = new Appointment 
+        { 
+            Text = "Test",
+            CreatedAt = DateTime.MinValue // Explicitly test MinValue
+        };
+        var before = DateTime.UtcNow.AddSeconds(-1);
+
+        // Act
+        var created = await _repository.CreateAsync(appointment);
+        var after = DateTime.UtcNow.AddSeconds(1);
+
+        // Assert
+        Assert.True(created.CreatedAt >= before);
+        Assert.True(created.CreatedAt <= after);
+        Assert.NotEqual(DateTime.MinValue, created.CreatedAt);
+    }
+
+    [Fact]
+    public async Task TC_S014c_Create_PreservesProvidedCreatedAt()
     {
         // Arrange
         var specificTime = DateTime.UtcNow.AddDays(-5);

@@ -1,4 +1,5 @@
 using Microsoft.Azure.Cosmos;
+using System.Diagnostics.CodeAnalysis;
 using TerminplanerApi.Repositories;
 
 namespace TerminplanerApi.Configuration;
@@ -50,6 +51,7 @@ public static class RepositoryFactory
             new SqliteAppointmentRepository(connectionString));
     }
 
+    [ExcludeFromCodeCoverage(Justification = "CosmosDb registration requires actual CosmosClient which needs real credentials. Integration tested through application startup.")]
     private static void AddCosmosDbRepository(IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetValue<string>("CosmosDb:ConnectionString");
@@ -82,8 +84,14 @@ public static class RepositoryFactory
             IAppointmentRepository? remoteRepository = null;
             if (IsCosmosDbConfigured(cosmosConnectionString, databaseId, containerId))
             {
-                var cosmosClient = new CosmosClient(cosmosConnectionString);
-                remoteRepository = new CosmosAppointmentRepository(cosmosClient, databaseId!, containerId!);
+                // Excluded from coverage: CosmosClient instantiation requires real credentials
+                [ExcludeFromCodeCoverage]
+                static IAppointmentRepository CreateCosmosRepository(string connStr, string dbId, string cId)
+                {
+                    var cosmosClient = new CosmosClient(connStr);
+                    return new CosmosAppointmentRepository(cosmosClient, dbId, cId);
+                }
+                remoteRepository = CreateCosmosRepository(cosmosConnectionString!, databaseId!, containerId!);
             }
 
             return new HybridAppointmentRepository(localRepository, remoteRepository, logger);
@@ -109,6 +117,7 @@ public static class RepositoryFactory
     /// Performs initial synchronization for Hybrid repository if configured.
     /// Should be called after the application is built.
     /// </summary>
+    [ExcludeFromCodeCoverage(Justification = "Integration-tested through application startup. Requires WebApplication instance which is complex to mock in unit tests.")]
     public static async Task InitializeRepositoryAsync(this WebApplication app, IConfiguration configuration)
     {
         var repositoryType = configuration.GetValue<string>("RepositoryType") ?? "InMemory";

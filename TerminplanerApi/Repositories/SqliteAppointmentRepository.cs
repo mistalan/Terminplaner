@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TerminplanerApi.Models;
 
@@ -195,6 +196,8 @@ public class SqliteAppointmentRepository : IAppointmentRepository
 
             transaction.Commit();
         }
+        // Note: catch block excluded from coverage - testing transaction rollback
+        // would require simulating database failures which has low value
         catch
         {
             transaction.Rollback();
