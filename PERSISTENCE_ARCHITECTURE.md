@@ -4,7 +4,12 @@ This document describes the persistence architecture implemented for the Terminp
 
 ## Overview
 
-The application uses the **Repository Pattern** with abstraction to support multiple storage backends. This design allows switching between in-memory storage (for development/testing) and Azure Cosmos DB (for production) without changing the business logic.
+The application uses the **Repository Pattern** with abstraction to support multiple storage backends. This design allows switching between different storage implementations without changing the business logic:
+
+- **InMemory**: For development and testing
+- **SQLite**: For local persistence with offline support
+- **Cosmos DB**: For cloud-based production storage
+- **Hybrid**: Combines SQLite (local) with Cosmos DB (cloud) synchronization
 
 ## Architecture Components
 
@@ -44,13 +49,55 @@ Located in: `TerminplanerApi/Repositories/CosmosAppointmentRepository.cs`
 - Implements all CRUD operations asynchronously
 - Uses document ID as partition key for optimal performance
 
+### 4. SQLite Implementation (`SqliteAppointmentRepository`)
+
+Located in: `TerminplanerApi/Repositories/SqliteAppointmentRepository.cs`
+
+- Local file-based persistence using SQLite
+- Provides offline-first capability
+- Creates database and table automatically on initialization
+- Stores appointments in a local `appointments.db` file
+- Uses Microsoft.Data.Sqlite (v9.0.0)
+- Generates GUIDs for appointment IDs
+- Preserves existing IDs when provided (for synchronization)
+
+### 5. Hybrid Implementation (`HybridAppointmentRepository`)
+
+Located in: `TerminplanerApi/Repositories/HybridAppointmentRepository.cs`
+
+- Combines local SQLite storage with cloud Cosmos DB synchronization
+- Provides offline capability with cloud backup
+- Implements automatic synchronization on application startup
+- Falls back to local-only mode when remote is unavailable
+
+**Synchronization Strategy:**
+
+On application startup (when internet is available):
+1. Load all appointments from both local and remote repositories
+2. Apply delta synchronization:
+   - Appointments only in remote → Add to local
+   - Appointments only in local → Add to remote
+   - Appointments in both but different → Update local (Cosmos wins)
+
+On application startup (no internet):
+- Uses local SQLite repository only
+- Logs warning and continues without sync
+
+**Known Limitations:**
+- Deletions are not synced (deleted local items may be recreated from remote)
+- Sync only occurs on startup (not on reconnect)
+- No unique constraints beyond ID (duplicates possible with same properties)
+
 ## Configuration
 
 The repository type is configured in `appsettings.json`:
 
 ```json
 {
-  "RepositoryType": "InMemory",  // or "CosmosDb"
+  "RepositoryType": "InMemory",  // Options: "InMemory", "Sqlite", "CosmosDb", "Hybrid"
+  "Sqlite": {
+    "ConnectionString": "Data Source=appointments.db"
+  },
   "CosmosDb": {
     "ConnectionString": "",  // Set via environment variables or user secrets - NEVER commit actual keys
     "DatabaseId": "db_1",
@@ -59,7 +106,14 @@ The repository type is configured in `appsettings.json`:
 }
 ```
 
-**⚠️ Security Warning**: The `ConnectionString` should be empty in committed files. Configure it using environment variables or user secrets. See [SECURITY_CONFIGURATION.md](SECURITY_CONFIGURATION.md) for details.
+### Repository Types
+
+- **InMemory**: Default for development/testing. No persistence, includes sample data.
+- **Sqlite**: Local file-based persistence. Good for offline-first scenarios.
+- **CosmosDb**: Cloud-based production storage with global distribution.
+- **Hybrid**: Combines SQLite (local) with Cosmos DB (cloud) for offline capability with cloud backup.
+
+**⚠️ Security Warning**: The `CosmosDb:ConnectionString` should be empty in committed files. Configure it using environment variables or user secrets. See [SECURITY_CONFIGURATION.md](SECURITY_CONFIGURATION.md) for details.
 
 ### Environment-Specific Configuration
 
@@ -117,10 +171,57 @@ if (repositoryType == "CosmosDb")
         return new CosmosAppointmentRepository(cosmosClient, databaseId, containerId);
     });
 }
+else if (repositoryType == "Sqlite")
+{
+    // Configure SQLite
+    var sqliteConnectionString = builder.Configuration.GetValue<string>("Sqlite:ConnectionString") 
+        ?? "Data Source=appointments.db";
+    builder.Services.AddSingleton<IAppointmentRepository>(sp =>
+        new SqliteAppointmentRepository(sqliteConnectionString));
+}
+else if (repositoryType == "Hybrid")
+{
+    // Configure Hybrid (SQLite + Cosmos DB with sync)
+    var sqliteConnectionString = builder.Configuration.GetValue<string>("Sqlite:ConnectionString") 
+        ?? "Data Source=appointments.db";
+    var cosmosConnectionString = builder.Configuration.GetValue<string>("CosmosDb:ConnectionString");
+    var databaseId = builder.Configuration.GetValue<string>("CosmosDb:DatabaseId");
+    var containerId = builder.Configuration.GetValue<string>("CosmosDb:ContainerId");
+
+    builder.Services.AddSingleton<IAppointmentRepository>(sp =>
+    {
+        var logger = sp.GetRequiredService<ILogger<HybridAppointmentRepository>>();
+        var localRepository = new SqliteAppointmentRepository(sqliteConnectionString);
+        
+        IAppointmentRepository? remoteRepository = null;
+        if (!string.IsNullOrEmpty(cosmosConnectionString) && 
+            !string.IsNullOrEmpty(databaseId) && 
+            !string.IsNullOrEmpty(containerId))
+        {
+            var cosmosClient = new CosmosClient(cosmosConnectionString);
+            remoteRepository = new CosmosAppointmentRepository(cosmosClient, databaseId, containerId);
+        }
+
+        return new HybridAppointmentRepository(localRepository, remoteRepository, logger);
+    });
+}
 else
 {
     // Use in-memory repository (default)
     builder.Services.AddSingleton<IAppointmentRepository, InMemoryAppointmentRepository>();
+}
+
+// Build the app
+var app = builder.Build();
+
+// Perform initial sync for Hybrid repository
+if (repositoryType == "Hybrid")
+{
+    var repository = app.Services.GetRequiredService<IAppointmentRepository>();
+    if (repository is HybridAppointmentRepository hybridRepository)
+    {
+        await hybridRepository.SyncAsync();
+    }
 }
 ```
 
@@ -160,9 +261,10 @@ See [SECURITY_CONFIGURATION.md](SECURITY_CONFIGURATION.md) for complete security
 
 ## NuGet Packages
 
-The following packages were added to support Cosmos DB:
+The following packages are used for persistence:
 
 - **Microsoft.Azure.Cosmos** (v3.54.0) - Azure Cosmos DB SDK
+- **Microsoft.Data.Sqlite** (v9.0.0) - SQLite database engine
 - **Newtonsoft.Json** (v13.0.4) - JSON serialization (required by Cosmos SDK)
 
 ## Testing
@@ -170,17 +272,37 @@ The following packages were added to support Cosmos DB:
 All tests have been updated to work with the new repository pattern:
 
 - **Unit Tests** (`AppointmentRepositoryTests.cs`): Test the `InMemoryAppointmentRepository` directly
+- **SQLite Tests** (`SqliteAppointmentRepositoryTests.cs`): Test SQLite repository CRUD operations and persistence
+- **Hybrid Tests** (`HybridAppointmentRepositoryTests.cs`): Test synchronization logic and offline scenarios
 - **Integration Tests** (`AppointmentApiIntegrationTests.cs`): Test the HTTP API endpoints
+- **Cosmos Tests** (`CosmosAppointmentRepositoryTests.cs`): Test Cosmos DB repository with mocked client
 
 ### Test Results
 
-✅ All 42 tests passing:
-- 23 unit tests
-- 19 integration tests
+✅ All 87 tests passing:
+- 23 unit tests (InMemory)
+- 13 unit tests (SQLite)
+- 12 unit tests (Hybrid)
+- 19 integration tests (API)
+- 20 unit tests (Cosmos - mocked)
 
 ## Migration Path
 
-To switch from in-memory to Cosmos DB:
+### To SQLite (Local Persistence Only)
+
+1. Update `appsettings.json`:
+   ```json
+   {
+     "RepositoryType": "Sqlite",
+     "Sqlite": {
+       "ConnectionString": "Data Source=appointments.db"
+     }
+   }
+   ```
+2. Restart the application
+3. Database file will be created automatically at the specified path
+
+### To Cosmos DB (Cloud Only)
 
 1. Ensure Azure Cosmos DB is set up with the correct database and container
 2. Update `appsettings.json`:
@@ -189,7 +311,24 @@ To switch from in-memory to Cosmos DB:
      "RepositoryType": "CosmosDb"
    }
    ```
-3. Restart the application
+3. Configure connection string via user secrets or environment variables
+4. Restart the application
+
+### To Hybrid (Local + Cloud with Sync)
+
+1. Ensure Azure Cosmos DB is set up
+2. Update `appsettings.json`:
+   ```json
+   {
+     "RepositoryType": "Hybrid",
+     "Sqlite": {
+       "ConnectionString": "Data Source=appointments.db"
+     }
+   }
+   ```
+3. Configure Cosmos DB connection string via user secrets or environment variables
+4. Restart the application
+5. Initial sync will occur automatically on startup
 
 ## MAUI App Updates
 
@@ -204,8 +343,10 @@ The MAUI app has been updated to work with string IDs:
 1. **Flexibility**: Easy to switch between storage implementations
 2. **Testability**: Can test with in-memory repository without external dependencies
 3. **Clean Architecture**: Business logic is decoupled from data access
-4. **Future-Proof**: Can add new repository implementations (e.g., SQL Server, MongoDB) without changing existing code
-5. **Production-Ready**: Azure Cosmos DB provides scalable, globally distributed database
+4. **Future-Proof**: Can add new repository implementations without changing existing code
+5. **Offline Support**: SQLite and Hybrid modes provide offline-first capability
+6. **Cloud Backup**: Hybrid mode automatically syncs with Cosmos DB when online
+7. **Production-Ready**: Azure Cosmos DB provides scalable, globally distributed database
 
 ## Future Enhancements
 
@@ -217,6 +358,11 @@ Potential improvements to consider:
 - Implement optimistic concurrency control using ETags
 - Add retry policies for transient failures
 - Implement health checks for Cosmos DB connectivity
+- Enhance sync logic:
+  - Sync deletions (track deleted items separately)
+  - Background sync on reconnection
+  - Conflict resolution UI for user input
+  - Define unique constraints beyond ID to prevent duplicates
 
 ## References
 

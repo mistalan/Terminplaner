@@ -1,36 +1,11 @@
-using Microsoft.Azure.Cosmos;
+using TerminplanerApi.Configuration;
 using TerminplanerApi.Models;
 using TerminplanerApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var repositoryType = builder.Configuration.GetValue<string>("RepositoryType") ?? "InMemory";
-
-if (repositoryType == "CosmosDb")
-{
-    // Configure Cosmos DB
-    var cosmosConnectionString = builder.Configuration.GetValue<string>("CosmosDb:ConnectionString");
-    var databaseId = builder.Configuration.GetValue<string>("CosmosDb:DatabaseId");
-    var containerId = builder.Configuration.GetValue<string>("CosmosDb:ContainerId");
-
-    if (string.IsNullOrEmpty(cosmosConnectionString) || string.IsNullOrEmpty(databaseId) || string.IsNullOrEmpty(containerId))
-    {
-        throw new InvalidOperationException("CosmosDb configuration is missing in appsettings.json");
-    }
-
-    builder.Services.AddSingleton<CosmosClient>(sp => new CosmosClient(cosmosConnectionString));
-    builder.Services.AddSingleton<IAppointmentRepository>(sp =>
-    {
-        var cosmosClient = sp.GetRequiredService<CosmosClient>();
-        return new CosmosAppointmentRepository(cosmosClient, databaseId, containerId);
-    });
-}
-else
-{
-    // Use in-memory repository (default)
-    builder.Services.AddSingleton<IAppointmentRepository, InMemoryAppointmentRepository>();
-}
+builder.Services.AddAppointmentRepository(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
@@ -44,6 +19,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Perform initial sync for Hybrid repository
+await app.InitializeRepositoryAsync(builder.Configuration);
 
 // Configure the HTTP request pipeline.
 app.UseCors();

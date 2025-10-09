@@ -165,6 +165,45 @@ public class AppointmentRepositoryTests
     }
 
     [Fact]
+    public async Task TC_U006b_Create_SetsCreatedAtWhenMinValue()
+    {
+        // Arrange
+        var repository = await CreateEmptyRepositoryAsync();
+        var before = DateTime.Now.AddSeconds(-1);
+
+        // Act
+        var appointment = await repository.CreateAsync(new Appointment 
+        { 
+            Text = "Test",
+            CreatedAt = DateTime.MinValue 
+        });
+        var after = DateTime.Now.AddSeconds(1);
+
+        // Assert
+        Assert.True(appointment.CreatedAt >= before);
+        Assert.True(appointment.CreatedAt <= after);
+        Assert.NotEqual(DateTime.MinValue, appointment.CreatedAt);
+    }
+
+    [Fact]
+    public async Task TC_U006c_Create_PreservesProvidedCreatedAt()
+    {
+        // Arrange
+        var repository = await CreateEmptyRepositoryAsync();
+        var specificTime = DateTime.Now.AddDays(-5);
+
+        // Act
+        var appointment = await repository.CreateAsync(new Appointment 
+        { 
+            Text = "Test",
+            CreatedAt = specificTime
+        });
+
+        // Assert
+        Assert.Equal(specificTime, appointment.CreatedAt);
+    }
+
+    [Fact]
     public async Task TC_U007_Create_AssignsPriority_WhenNotSpecified()
     {
         // Arrange

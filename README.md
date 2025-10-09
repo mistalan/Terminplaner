@@ -27,13 +27,20 @@ Moderne Terminplaner-App für die Verwaltung von Terminen mit Kategorien und Pri
 - 📱 **Cross-Platform** - Eine Codebasis für alle Plattformen
 - 🎯 **Native Performance** - Echte native Apps, keine Web-Wrapper
 - 🚀 **Schnell** - Direkte API-Kommunikation mit dem Backend
+- 💾 **Lokale Speicherung** - Daten bleiben auch offline erhalten (SQLite)
+- ☁️ **Cloud-Synchronisation** - Automatisches Backup in Azure Cosmos DB (optional)
+- 🔄 **Offline-Modus** - Arbeiten ohne Internetverbindung
 
 ## 🛠️ Tech Stack
 
 - **Backend**: ASP.NET Core 9.0 Web API (C#)
 - **Frontend**: .NET MAUI (Multi-platform App UI) mit XAML
 - **Pattern**: MVVM (Model-View-ViewModel) mit CommunityToolkit.Mvvm
-- **Datenspeicher**: Repository Pattern mit In-Memory (Standard) oder Azure Cosmos DB (optional)
+- **Datenspeicher**: Repository Pattern mit mehreren Optionen:
+  - **InMemory**: Für Entwicklung und Tests (Standard)
+  - **SQLite**: Lokale Datenpersistenz mit Offline-Support
+  - **Cosmos DB**: Cloud-basierte Datenspeicherung
+  - **Hybrid**: SQLite + Cosmos DB mit automatischer Synchronisation
 - **API**: RESTful API mit JSON
 - **Deployment**: Android, iOS, Windows, macOS
 
@@ -54,7 +61,31 @@ Moderne Terminplaner-App für die Verwaltung von Terminen mit Kategorien und Pri
    cd Terminplaner/TerminplanerApi
    ```
 
-2. **API starten:**
+2. **(Optional) Speicher-Modus konfigurieren:**
+   
+   Standardmäßig nutzt die App In-Memory-Speicher. Für persistente Speicherung bearbeite `appsettings.json`:
+   
+   **Für lokale SQLite-Speicherung:**
+   ```json
+   {
+     "RepositoryType": "Sqlite"
+   }
+   ```
+   
+   **Für Hybrid-Modus (SQLite + Cloud-Sync):**
+   ```json
+   {
+     "RepositoryType": "Hybrid"
+   }
+   ```
+   Dann Cosmos DB Connection String via User Secrets konfigurieren:
+   ```bash
+   dotnet user-secrets set "CosmosDb:ConnectionString" "YOUR_CONNECTION_STRING"
+   ```
+   
+   📖 Mehr Details: [LOCAL_PERSISTENCE_GUIDE.md](LOCAL_PERSISTENCE_GUIDE.md)
+
+3. **API starten:**
    ```bash
    dotnet run
    ```
@@ -125,6 +156,34 @@ dotnet build -t:Run -f net9.0-maccatalyst
 - Nutze die ⬆️ und ⬇️ Buttons um Termine nach oben oder unten zu verschieben
 - Die Position bestimmt die Priorität (oben = höchste Priorität)
 
+## 💾 Speicher-Optionen
+
+Die App unterstützt verschiedene Speicher-Modi:
+
+| Modus | Beschreibung | Offline | Cloud-Backup |
+|-------|--------------|---------|--------------|
+| **InMemory** | Daten nur im RAM (Standard) | ❌ | ❌ |
+| **Sqlite** | Lokale SQLite-Datenbank | ✅ | ❌ |
+| **CosmosDb** | Azure Cosmos DB Cloud-Speicher | ❌ | ✅ |
+| **Hybrid** | SQLite + Cosmos DB mit Auto-Sync | ✅ | ✅ |
+
+**Konfiguration** in `appsettings.json`:
+```json
+{
+  "RepositoryType": "Sqlite"  // Oder: "InMemory", "CosmosDb", "Hybrid"
+}
+```
+
+📖 **Vollständige Anleitung:** [LOCAL_PERSISTENCE_GUIDE.md](LOCAL_PERSISTENCE_GUIDE.md)
+
+### Hybrid-Modus (Empfohlen)
+
+Der Hybrid-Modus bietet das Beste aus beiden Welten:
+- ✅ Arbeitet offline (lokale SQLite-Datenbank)
+- ✅ Automatische Cloud-Synchronisation beim Start
+- ✅ Daten bleiben bei App-Absturz erhalten
+- ✅ Einfaches Backup in Azure Cosmos DB
+
 ## 🔌 API Endpoints
 
 Die Anwendung bietet folgende REST API Endpoints:
@@ -167,13 +226,18 @@ Terminplaner/
 │   ├── Repositories/
 │   │   ├── IAppointmentRepository.cs # Repository-Interface
 │   │   ├── InMemoryAppointmentRepository.cs # In-Memory Implementierung
-│   │   └── CosmosAppointmentRepository.cs # Azure Cosmos DB Implementierung
+│   │   ├── SqliteAppointmentRepository.cs # SQLite Implementierung
+│   │   ├── CosmosAppointmentRepository.cs # Azure Cosmos DB Implementierung
+│   │   └── HybridAppointmentRepository.cs # Hybrid (SQLite + Cosmos DB)
 │   ├── Program.cs                # API-Konfiguration & Endpoints
 │   └── TerminplanerApi.csproj    # Backend-Projekt-Datei
 │
 ├── TerminplanerApi.Tests/        # Tests für Backend API
 │   ├── AppointmentRepositoryTests.cs      # Unit Tests (23)
+│   ├── SqliteAppointmentRepositoryTests.cs # SQLite Tests (13)
+│   ├── HybridAppointmentRepositoryTests.cs # Hybrid Tests (12)
 │   ├── AppointmentApiIntegrationTests.cs # Integration Tests (19)
+│   ├── CosmosAppointmentRepositoryTests.cs # Cosmos Tests (20)
 │   ├── TEST_CASES.md             # Detaillierte Test-Dokumentation
 │   └── TerminplanerApi.Tests.csproj    # Test-Projekt-Datei
 │

@@ -57,8 +57,17 @@ public class InMemoryAppointmentRepository : IAppointmentRepository
 
     public Task<Appointment> CreateAsync(Appointment appointment)
     {
-        appointment.Id = _nextId++.ToString();
-        appointment.CreatedAt = DateTime.Now;
+        // Preserve ID if provided, otherwise generate sequential ID
+        if (string.IsNullOrEmpty(appointment.Id))
+        {
+            appointment.Id = _nextId++.ToString();
+        }
+        
+        // Only set CreatedAt if not already set (to preserve during sync)
+        if (appointment.CreatedAt == default || appointment.CreatedAt == DateTime.MinValue)
+        {
+            appointment.CreatedAt = DateTime.Now;
+        }
 
         // Set priority to last if not specified
         if (appointment.Priority == 0)
