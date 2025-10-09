@@ -26,6 +26,36 @@ if (repositoryType == "CosmosDb")
         return new CosmosAppointmentRepository(cosmosClient, databaseId, containerId);
     });
 }
+else if (repositoryType == "Sqlite")
+{
+    // Configure SQLite
+    var sqliteConnectionString = builder.Configuration.GetValue<string>("Sqlite:ConnectionString") ?? "Data Source=appointments.db";
+    builder.Services.AddSingleton<IAppointmentRepository>(sp =>
+        new SqliteAppointmentRepository(sqliteConnectionString));
+}
+else if (repositoryType == "Hybrid")
+{
+    // Configure Hybrid (SQLite + Cosmos DB with sync)
+    var sqliteConnectionString = builder.Configuration.GetValue<string>("Sqlite:ConnectionString") ?? "Data Source=appointments.db";
+    var cosmosConnectionString = builder.Configuration.GetValue<string>("CosmosDb:ConnectionString");
+    var databaseId = builder.Configuration.GetValue<string>("CosmosDb:DatabaseId");
+    var containerId = builder.Configuration.GetValue<string>("CosmosDb:ContainerId");
+
+    builder.Services.AddSingleton<IAppointmentRepository>(sp =>
+    {
+        var logger = sp.GetRequiredService<ILogger<HybridAppointmentRepository>>();
+        var localRepository = new SqliteAppointmentRepository(sqliteConnectionString);
+        
+        IAppointmentRepository? remoteRepository = null;
+        if (!string.IsNullOrEmpty(cosmosConnectionString) && !string.IsNullOrEmpty(databaseId) && !string.IsNullOrEmpty(containerId))
+        {
+            var cosmosClient = new CosmosClient(cosmosConnectionString);
+            remoteRepository = new CosmosAppointmentRepository(cosmosClient, databaseId, containerId);
+        }
+
+        return new HybridAppointmentRepository(localRepository, remoteRepository, logger);
+    });
+}
 else
 {
     // Use in-memory repository (default)
@@ -44,6 +74,16 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Perform initial sync for Hybrid repository
+if (repositoryType == "Hybrid")
+{
+    var repository = app.Services.GetRequiredService<IAppointmentRepository>();
+    if (repository is HybridAppointmentRepository hybridRepository)
+    {
+        await hybridRepository.SyncAsync();
+    }
+}
 
 // Configure the HTTP request pipeline.
 app.UseCors();
