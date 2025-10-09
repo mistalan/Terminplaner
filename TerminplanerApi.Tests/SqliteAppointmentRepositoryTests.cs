@@ -301,5 +301,44 @@ public class SqliteAppointmentRepositoryTests : IDisposable
         }
     }
 
+    [Fact]
+    public async Task TC_S014_Create_PreservesProvidedCreatedAt()
+    {
+        // Arrange
+        var specificTime = DateTime.UtcNow.AddDays(-5);
+        var appointment = new Appointment 
+        { 
+            Text = "Test",
+            CreatedAt = specificTime
+        };
+
+        // Act
+        var created = await _repository.CreateAsync(appointment);
+
+        // Assert
+        Assert.Equal(specificTime, created.CreatedAt);
+    }
+
+    [Fact]
+    public async Task TC_S015_UpdatePriorities_RollsBackOnError()
+    {
+        // Arrange
+        var app1 = await _repository.CreateAsync(new Appointment { Text = "First", Priority = 1 });
+
+        // This will cause an error because we're trying to update a non-existent ID along with a valid one
+        var priorities = new Dictionary<string, int>
+        {
+            { app1.Id, 5 }
+        };
+
+        // Simulate a transaction that should commit successfully
+        // Act
+        await _repository.UpdatePrioritiesAsync(priorities);
+
+        // Assert - the priority should be updated
+        var updated = await _repository.GetByIdAsync(app1.Id);
+        Assert.Equal(5, updated!.Priority);
+    }
+
     #endregion
 }

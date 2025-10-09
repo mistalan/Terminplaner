@@ -148,6 +148,25 @@ public class HybridAppointmentRepositoryTests : IDisposable
         await hybrid.SyncAsync();
     }
 
+    [Fact]
+    public async Task TC_H005b_Sync_ContinuesOnRemoteError()
+    {
+        // Arrange
+        var local = CreateLocalRepository();
+        var mockRemote = new Mock<IAppointmentRepository>();
+        mockRemote.Setup(r => r.GetAllAsync())
+            .ThrowsAsync(new Exception("Remote connection failed"));
+
+        var hybrid = new HybridAppointmentRepository(local, mockRemote.Object, _mockLogger.Object);
+
+        // Act - should not throw, should continue in local-only mode
+        await hybrid.SyncAsync();
+
+        // Assert - can still use local repository
+        var created = await hybrid.CreateAsync(new Appointment { Text = "Local Test" });
+        Assert.NotNull(created);
+    }
+
     #endregion
 
     #region CRUD Tests (Post-Sync)
@@ -218,6 +237,42 @@ public class HybridAppointmentRepositoryTests : IDisposable
         Assert.True(appointments.Count >= 2);
         Assert.Contains(appointments, a => a.Text == "Test 1");
         Assert.Contains(appointments, a => a.Text == "Test 2");
+    }
+
+    [Fact]
+    public async Task TC_H008b_GetById_ReturnsFromLocal()
+    {
+        // Arrange
+        var local = CreateLocalRepository();
+        var remote = CreateRemoteRepository();
+        var hybrid = new HybridAppointmentRepository(local, remote, _mockLogger.Object);
+        await hybrid.SyncAsync();
+
+        var created = await hybrid.CreateAsync(new Appointment { Text = "Test Appointment" });
+
+        // Act
+        var retrieved = await hybrid.GetByIdAsync(created.Id);
+
+        // Assert
+        Assert.NotNull(retrieved);
+        Assert.Equal(created.Id, retrieved.Id);
+        Assert.Equal("Test Appointment", retrieved.Text);
+    }
+
+    [Fact]
+    public async Task TC_H008c_GetById_ReturnsNullWhenNotFound()
+    {
+        // Arrange
+        var local = CreateLocalRepository();
+        var remote = CreateRemoteRepository();
+        var hybrid = new HybridAppointmentRepository(local, remote, _mockLogger.Object);
+        await hybrid.SyncAsync();
+
+        // Act
+        var retrieved = await hybrid.GetByIdAsync("non-existent-id");
+
+        // Assert
+        Assert.Null(retrieved);
     }
 
     [Fact]
@@ -345,6 +400,81 @@ public class HybridAppointmentRepositoryTests : IDisposable
         var localAppt = await local.GetByIdAsync(created.Id);
         Assert.NotNull(localAppt);
         Assert.Equal("Test", localAppt.Text);
+    }
+
+    [Fact]
+    public async Task TC_H013_Update_ContinuesWhenRemoteFails()
+    {
+        // Arrange
+        var local = CreateLocalRepository();
+        
+        var mockRemote = new Mock<IAppointmentRepository>();
+        mockRemote.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Appointment>());
+        mockRemote.Setup(r => r.UpdateAsync(It.IsAny<string>(), It.IsAny<Appointment>()))
+            .ThrowsAsync(new Exception("Network error"));
+
+        var hybrid = new HybridAppointmentRepository(local, mockRemote.Object, _mockLogger.Object);
+        await hybrid.SyncAsync();
+        
+        var created = await hybrid.CreateAsync(new Appointment { Text = "Original" });
+
+        // Act - should not throw even though remote fails
+        var updated = await hybrid.UpdateAsync(created.Id, new Appointment { Text = "Updated" });
+
+        // Assert - local should have it
+        Assert.NotNull(updated);
+        Assert.Equal("Updated", updated.Text);
+    }
+
+    [Fact]
+    public async Task TC_H014_Delete_ContinuesWhenRemoteFails()
+    {
+        // Arrange
+        var local = CreateLocalRepository();
+        
+        var mockRemote = new Mock<IAppointmentRepository>();
+        mockRemote.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Appointment>());
+        mockRemote.Setup(r => r.DeleteAsync(It.IsAny<string>()))
+            .ThrowsAsync(new Exception("Network error"));
+
+        var hybrid = new HybridAppointmentRepository(local, mockRemote.Object, _mockLogger.Object);
+        await hybrid.SyncAsync();
+        
+        var created = await hybrid.CreateAsync(new Appointment { Text = "To Delete" });
+
+        // Act - should not throw even though remote fails
+        var deleted = await hybrid.DeleteAsync(created.Id);
+
+        // Assert - local deletion should succeed
+        Assert.True(deleted);
+        var localAppt = await local.GetByIdAsync(created.Id);
+        Assert.Null(localAppt);
+    }
+
+    [Fact]
+    public async Task TC_H015_UpdatePriorities_ContinuesWhenRemoteFails()
+    {
+        // Arrange
+        var local = CreateLocalRepository();
+        
+        var mockRemote = new Mock<IAppointmentRepository>();
+        mockRemote.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Appointment>());
+        mockRemote.Setup(r => r.UpdatePrioritiesAsync(It.IsAny<Dictionary<string, int>>()))
+            .ThrowsAsync(new Exception("Network error"));
+
+        var hybrid = new HybridAppointmentRepository(local, mockRemote.Object, _mockLogger.Object);
+        await hybrid.SyncAsync();
+        
+        var app1 = await hybrid.CreateAsync(new Appointment { Text = "First", Priority = 1 });
+
+        var priorities = new Dictionary<string, int> { { app1.Id, 5 } };
+
+        // Act - should not throw even though remote fails
+        await hybrid.UpdatePrioritiesAsync(priorities);
+
+        // Assert - local should have updated priority
+        var localAppt = await local.GetByIdAsync(app1.Id);
+        Assert.Equal(5, localAppt!.Priority);
     }
 
     #endregion
