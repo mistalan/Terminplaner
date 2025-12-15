@@ -55,14 +55,14 @@ jobs:
         dotnet publish --configuration Release --output ./publish/win-x64 --runtime win-x64 --self-contained false
 
     - name: Upload Linux artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: api-linux-x64
         path: TerminplanerApi/publish/linux-x64/
         retention-days: 30
 
     - name: Upload Windows artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: api-win-x64
         path: TerminplanerApi/publish/win-x64/
@@ -76,7 +76,7 @@ jobs:
         zip -r terminplaner-api-win-x64.zip publish/win-x64/*
 
     - name: Upload deployment packages
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: deployment-packages
         path: |

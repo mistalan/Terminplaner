@@ -53,7 +53,7 @@ jobs:
         dotnet publish -f net9.0-android -c ${{ github.event.inputs.configuration || 'Release' }}
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: terminplaner-android-apk
         path: |
@@ -93,7 +93,7 @@ jobs:
   #     run: Remove-Item -Path "${{ github.workspace }}/signing.keystore"
   #
   #   - name: Upload signed APK
-  #     uses: actions/upload-artifact@v4
+  #     uses: actions/upload-artifact@v6
   #     with:
   #       name: terminplaner-android-signed
   #       path: TerminplanerMaui/bin/Release/net9.0-android/publish/*.apk
